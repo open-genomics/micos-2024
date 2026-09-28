@@ -68,6 +68,7 @@ class FakeSample:
 | `test_summarize_results.py` | HTML 报告生成 |
 | `test_full_run.py` | 流程编排和步骤跳过 |
 | `test_shell_wrappers.py` | Shell 包装层回归 |
+| `test_orchestration_docs.py` | 编排口径的文档一致性（CLI 唯一生产编排、WDL 实验性、不支持断点续传） |
 | `test_docs_whitepaper.py` | 文档站组件和页面完整性 |
 
 ## 测试标记

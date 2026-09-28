@@ -18,7 +18,7 @@ const sharedThemeConfig = {
   outline: [2, 3] as [number, number],
   search: { provider: 'local' as const },
   socialLinks: [
-    { icon: 'github', link: 'https://github.com/LessUp/micos-2024' },
+    { icon: 'github', link: 'https://github.com/open-genomics/micos-2024' },
   ],
 }
 

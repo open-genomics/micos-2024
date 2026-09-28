@@ -81,6 +81,6 @@ KneadData 使用 Bowtie2 进行宿主序列比对和去除：
     title: 'bioBakery: a meta-omic analysis environment',
     venue: 'Bioinformatics',
     year: 2018,
-    doi: '10.1093/bioinformatics/btx261'
+    doi: '10.1093/bioinformatics/btx754'
   }"
 />

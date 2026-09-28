@@ -152,11 +152,13 @@ cp config/samples.tsv.template config/samples.tsv
 
 ### 数据库准备
 
-MICOS-2024 依赖以下参考数据库：
+MICOS-2024 主链路依赖以下参考数据库：
 
 - **Kraken2 数据库** — 物种分类
 - **KneadData 数据库** — 宿主 DNA 去除
-- **QIIME2 分类器** — 分类学注释
+
+HUMAnN 所需的 ChocoPhlAn / UniRef90 数据库由 HUMAnN 自身管理，不在本仓库配置中；
+其余愿景数据库（QIIME2 分类器等）尚未接入主链路，见[配置愿景参数路线图](docs/zh/roadmap.md)。
 
 下载与配置方法参见[配置指南](docs/zh/configuration.md)，路径填写参照 `config/databases.yaml.template`。
 

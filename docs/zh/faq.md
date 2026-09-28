@@ -16,9 +16,11 @@ title: 常见问题
 
 优先用 Python CLI。包装脚本适合兼容旧工作流，但不是新项目的事实标准。
 
-## 为什么配置模板看起来比 CLI 大很多
+## 为什么配置模板里没有 QC / Kraken2 confidence 这些参数
 
-模板反映的是更大的平台视野（包括 `scripts/` 下的扩展分析），而当前稳定 CLI 只覆盖主链路。
+活动配置模板只保留已接入 CLI 的字段（`enforce-effective-configuration`，未知字段
+`extra="forbid"` 直接拒绝）。未接入的愿景参数收纳在
+[配置愿景参数路线图](./roadmap.md)，接入对应 CLI 后再移回模板。
 
 ## 从哪里开始了解项目
 

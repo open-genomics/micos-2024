@@ -43,6 +43,9 @@ micos full-run \
 
 跳过参数：`--skip-qc`、`--skip-taxonomy`、`--skip-functional`、`--skip-diversity`
 
+可选参数：`--metadata` 指定样本元数据 TSV（`sample-id` 列与 FASTQ 文件名 join，
+模板见 `config/samples.tsv.template`）。
+
 ## `run quality-control`
 
 ```bash

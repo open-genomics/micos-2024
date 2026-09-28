@@ -84,7 +84,7 @@ class Sample:
 ```python
 class AnalysisConfig(BaseModel):
     paths: PathsConfig          # input_dir, output_dir, databases
-    resources: ResourcesConfig  # max_threads, memory_gb
+    resources: ResourcesConfig  # max_threads
 
     @classmethod
     def from_yaml(cls, path: Path) -> "AnalysisConfig": ...
