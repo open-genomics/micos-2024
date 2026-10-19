@@ -156,7 +156,7 @@ export default withMermaid(defineConfig({
         docFooter: { prev: '上一页', next: '下一页' },
         footer: {
           message: 'MICOS-2024 宏基因组分析平台',
-          copyright: 'MIT License · LessUp / MICOS-2024',
+          copyright: 'MIT License · holtwood / MICOS-2024',
         },
       },
     },
