@@ -268,10 +268,15 @@ MICOS-2024 是参加 2024 届"猛犸杯"大赛的参赛作品，聚焦**宏基�
 - [DESeq2](https://bioconductor.org/packages/DESeq2/) — 差异丰度分析
 - [Phyloseq](https://joey711.github.io/phyloseq/) — 微生物组生态分析
 
+## 相关项目
+
+- [wiki-bioinfo](https://github.com/open-genomics/wiki-bioinfo) — 生物信息学体系化知识库（含宏基因组学习路径）
+- [awesome-bioinfo-algorithms](https://github.com/open-genomics/awesome-bioinfo-algorithms) — 精选生物信息学算法知识库
+
 ---
 
 <div align="center">
 
-**MICOS-2024** | 2024"猛犸杯"国际生命科学数据创新大赛参赛作品
+**MICOS-2024** | 2024"猛犸杯"国际生命科学数据创新大赛参赛作品 · [Open Genomics](https://github.com/open-genomics)
 
 </div>
