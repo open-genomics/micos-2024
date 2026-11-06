@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-06
+
 - 新增 `results/run_manifest.json`：记录 MICOS/Python/平台/git commit、外部工具版本、数据库路径、输入文件、参数和阶段状态/耗时
 - 新增 `micos doctor`（支持 `--json`）：检查外部工具、数据库路径与 Python 环境
 - 输入缺失改为 fail-closed：`NoSamplesError`、`MissingInputError`、`StageOutputError` 不再被当成成功；CLI 映射稳定退出码
