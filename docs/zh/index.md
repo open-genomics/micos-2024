@@ -25,6 +25,6 @@ features:
     details: HUMAnN 基因家族和代谢通路丰度
   - title: 结果汇总
     details: 自动生成 HTML 结果索引报告
-  - title: 可重现部署
-    details: WDL 工作流资产 + Singularity 容器定义
+  - title: 可追溯运行
+    details: run_manifest.json + micos doctor + 自包含 HTML 报告
 ---

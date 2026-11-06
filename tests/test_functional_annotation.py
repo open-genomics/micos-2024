@@ -3,7 +3,10 @@
 
 from pathlib import Path
 
+import pytest
+
 from micos import functional_annotation
+from micos.errors import NoSamplesError
 
 
 def test_run_functional_annotation_assembles_humann_command(tmp_path, monkeypatch):
@@ -39,8 +42,8 @@ def test_run_functional_annotation_assembles_humann_command(tmp_path, monkeypatc
     assert not (output_dir / "temp_humann_input").exists()
 
 
-def test_run_functional_annotation_skips_when_no_samples(tmp_path, monkeypatch):
-    """无样本时应直接返回，不调用任何命令."""
+def test_run_functional_annotation_fails_when_no_samples(tmp_path, monkeypatch):
+    """无样本时应 fail-closed，不调用任何命令."""
     commands = []
     monkeypatch.setattr(
         functional_annotation,
@@ -52,11 +55,12 @@ def test_run_functional_annotation_skips_when_no_samples(tmp_path, monkeypatch):
     input_dir.mkdir()
     output_dir = tmp_path / "output"
 
-    functional_annotation.run_functional_annotation(
-        input_dir=input_dir,
-        output_dir=output_dir,
-        threads=4,
-    )
+    with pytest.raises(NoSamplesError, match="未找到"):
+        functional_annotation.run_functional_annotation(
+            input_dir=input_dir,
+            output_dir=output_dir,
+            threads=4,
+        )
 
     assert commands == []
 
@@ -80,11 +84,12 @@ def test_run_functional_annotation_passes_metadata_path(tmp_path, monkeypatch):
 
     input_dir = tmp_path / "input"
     input_dir.mkdir()
-    functional_annotation.run_functional_annotation(
-        input_dir=input_dir,
-        output_dir=tmp_path / "output",
-        threads=4,
-        metadata_path="config/samples.tsv",
-    )
+    with pytest.raises(NoSamplesError):
+        functional_annotation.run_functional_annotation(
+            input_dir=input_dir,
+            output_dir=tmp_path / "output",
+            threads=4,
+            metadata_path="config/samples.tsv",
+        )
 
     assert captured["metadata_path"] == Path("config/samples.tsv")

@@ -4,8 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- 新增 `results/run_manifest.json`：记录 MICOS/Python/平台/git commit、外部工具版本、数据库路径、输入文件、参数和阶段状态/耗时
+- 新增 `micos doctor`（支持 `--json`）：检查外部工具、数据库路径与 Python 环境
+- 输入缺失改为 fail-closed：`NoSamplesError`、`MissingInputError`、`StageOutputError` 不再被当成成功；CLI 映射稳定退出码
+- HTML 汇总报告升级：概览卡片、Top taxa、Alpha 多样性表、运行清单和产物索引
+- QIIME2 多样性阶段新增 Alpha TSV 与 Beta 距离矩阵 TSV 导出
+- 样本元数据兼容 QIIME 风格 `#SampleID` 表头；仓库自带示例 metadata 可直接加载
+- 修复文档 URL、Conda 快速开始缺少 `pip install -e .`、Discussions 死链等 onboarding 问题
+- README 重构为产品首页；赛事背景移入 `docs/zh/research/competition.md`
+- 新增 `CITATION.cff`、`SECURITY.md`；CI 增加 Python 3.12，覆盖率门槛提升到 80%
+- 版本号改为 `pyproject.toml` 静态维护（1.2.0），`micos --version` 不再显示 git dev 版本
 - 配置强制校验（`enforce-effective-configuration`）：生产配置 model 统一 `extra="forbid"`，未知字段立即失败；移除 `max_memory`/`memory_gb` 等未接入 CLI 的愿景字段（迁至 `docs/zh/roadmap.md`）；明确配置优先级（CLI > analysis.yaml > databases.yaml > 默认）并支持 resolved value 来源输出；相对路径按所在配置文件目录解析；`validate-config` 对语法/未知字段/必需 stage 依赖返回非零；`full-run --dry-run` 输出 resolved plan（含 stage、输入、输出、threads、数据库、参数来源）且不执行外部工具
-- 统一 GitHub 身份为 LessUp，清除全部遗留 BGI-MICOS 引用
+- 清理历史身份与组织引用（LessUp → holtwood / open-genomics）
 - 修复文档站英文 404 自动重定向，CI 增加文档构建检查
 - 归档遗留 `workflows/wdl_scripts/`，统一以 `steps/` 为权威 WDL 源
 - 修复 WDL 语法错误（Directory/None 关键字）、统一 `${}` 为 `~{}`、固定生信工具版本

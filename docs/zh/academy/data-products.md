@@ -13,17 +13,21 @@ MICOS-2024 输出一组不同成熟度的分析产物。理解这些产物及其
 | 清洗读段 | `results/quality_control/` | 经过过滤后的输入数据 |
 | 分类报告 | `results/taxonomic_profiling/` | 每个样本的分类学证据摘要 |
 | BIOM 表 | `results/taxonomic_profiling/feature-table.biom` | 结构化丰度矩阵 |
-| 多样性产物 | `results/diversity_analysis/` | Shannon / Bray-Curtis 指标 |
+| 多样性产物 | `results/diversity_analysis/` | QIIME2 `.qza`、Alpha TSV、Beta 距离矩阵 TSV |
 | 功能表 | `results/functional_annotation/` | 通路和功能丰度 |
-| 汇总报告 | `results/micos_summary_report.html` | 综合结果索引 |
+| 运行清单 | `results/run_manifest.json` | 版本、数据库、输入文件、参数与阶段状态 |
+| 汇总报告 | `results/micos_summary_report.html` | 自包含 HTML：概览、Top taxa、Alpha 表、运行清单与产物索引 |
 
 ## results 目录结构
 
 ```text
 results/
+├── run_manifest.json
 ├── quality_control/
 ├── taxonomic_profiling/
 ├── diversity_analysis/
+│   ├── alpha_diversity/alpha-diversity.tsv
+│   └── beta_diversity/distance-matrix.tsv
 ├── functional_annotation/
 └── micos_summary_report.html
 ```

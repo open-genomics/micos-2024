@@ -13,6 +13,7 @@ import yaml
 from click.core import ParameterSource
 from pydantic import ValidationError
 
+from micos import __version__
 from micos.config import (
     DEFAULT_THREADS,
     AnalysisConfig,
@@ -22,6 +23,8 @@ from micos.config import (
     resolve_full_run_config,
 )
 from micos.diversity_analysis import run_diversity_analysis
+from micos.doctor import run_doctor
+from micos.errors import MicosError
 from micos.full_run import run_full_pipeline
 from micos.functional_annotation import run_functional_annotation
 from micos.quality_control import run_qc
@@ -59,6 +62,12 @@ def _invoke(label: str, action: Callable[[], None]) -> None:
     """执行模块并在失败时输出统一的错误信息."""
     try:
         action()
+    except MicosError as exc:
+        click.secho(f"{label}执行失败: {exc}", fg="red")
+        sys.exit(exc.exit_code)
+    except FileNotFoundError as exc:
+        click.secho(f"{label}执行失败: 未找到外部工具或文件: {exc}", fg="red")
+        sys.exit(EXIT_MISSING_DEPS)
     except Exception as exc:
         click.secho(f"{label}执行失败: {exc}", fg="red")
         raise
@@ -94,7 +103,7 @@ def _param_source(ctx: click.Context, name: str, config_sources: dict[str, str])
 @click.option("--verbose", is_flag=True, help="启用详细的 DEBUG 级别日志.")
 @click.option("--dry-run", is_flag=True, help="仅显示将要执行的命令，不实际运行.")
 @click.version_option(
-    version=None, prog_name="MICOS-2024", message="%(prog)s %(version)s"
+    version=__version__, prog_name="MICOS-2024", message="%(prog)s %(version)s"
 )
 @click.pass_context
 def main(
@@ -210,6 +219,27 @@ def validate_config(ctx: click.Context, config_path: str | None) -> None:
 
     click.secho("\n✓ 配置验证完成!", fg="green")
     sys.exit(EXIT_SUCCESS)
+
+
+@main.command("doctor")
+@click.option(
+    "--kneaddata-db",
+    type=click.Path(exists=False, dir_okay=True),
+    help="KneadData 参考数据库路径（可选）。",
+)
+@click.option(
+    "--kraken2-db",
+    type=click.Path(exists=False, dir_okay=True),
+    help="Kraken2 参考数据库路径（可选）。",
+)
+@click.option("--json", "json_output", is_flag=True, help="输出机器可读 JSON.")
+def doctor(
+    kneaddata_db: str | None,
+    kraken2_db: str | None,
+    json_output: bool,
+) -> None:
+    """检查外部工具、数据库路径与运行环境。"""
+    sys.exit(run_doctor(kneaddata_db, kraken2_db, json_output))
 
 
 @main.command("full-run")

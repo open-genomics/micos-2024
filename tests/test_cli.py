@@ -310,3 +310,46 @@ def test_full_run_dry_run_cli_override_reports_cli_source(tmp_path, monkeypatch)
 
     assert result.exit_code == 0, result.output
     assert "threads: cli" in result.output
+
+
+def test_full_run_maps_no_samples_to_stable_exit_code(tmp_path, monkeypatch):
+    """NoSamplesError 应映射为稳定的输入错误退出码。"""
+    from micos.errors import NoSamplesError
+
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    results_dir = tmp_path / "results"
+    db = tmp_path / "db"
+    db.mkdir()
+
+    def fake_run_full_pipeline(*args, **kwargs):
+        raise NoSamplesError("没有样本")
+
+    monkeypatch.setattr("micos.cli.run_full_pipeline", fake_run_full_pipeline)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "full-run",
+            "--input-dir",
+            str(input_dir),
+            "--results-dir",
+            str(results_dir),
+            "--kneaddata-db",
+            str(db),
+            "--kraken2-db",
+            str(db),
+        ],
+    )
+
+    assert result.exit_code == 6, result.output
+    assert "没有样本" in result.output
+
+def test_version_command_reports_release_version():
+    """--version 应报告发布版本，而不是 git dev 版本。"""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--version"])
+
+    assert result.exit_code == 0
+    assert "1.2.0" in result.output

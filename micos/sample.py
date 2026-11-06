@@ -15,6 +15,27 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
+def _canonical_metadata_field(field: str) -> str:
+    """规范化常见样本 ID 表头写法。"""
+    key = field.lstrip("#").strip()
+    if key.lower() in {"sampleid", "sample-id", "sample_id"}:
+        return "sample-id"
+    return key
+
+
+def _resolve_metadata_id_column(
+    header_fields: list[str], sample_id_column: str
+) -> str | None:
+    """在表头中解析样本 ID 列，兼容大小写和连字符/下划线差异。"""
+    if sample_id_column in header_fields:
+        return sample_id_column
+    target = _canonical_metadata_field(sample_id_column)
+    for column in header_fields:
+        if _canonical_metadata_field(column) == target:
+            return column
+    return None
+
+
 @dataclass
 class Sample:
     """样本数据模型 - 表示一个测序样本。
@@ -43,7 +64,7 @@ class Sample:
         """加载样本元数据 TSV 文件。
 
         支持 `config/samples.tsv.template` 格式：首行为表头，以 `#` 开头的行
-        视为注释跳过。返回 {sample_id: {column: value}} 映射。
+        视为注释跳过。同时兼容 QIIME 风格的 `#SampleID` 表头。
 
         Args:
             metadata_path: TSV 元数据文件路径
@@ -58,28 +79,49 @@ class Sample:
         if not metadata_path.exists():
             return {}
 
-        rows: list[dict[str, str]] = []
-        with metadata_path.open("r", encoding="utf-8", newline="") as handle:
-            # 跳过以 # 开头的注释行
-            filtered = (line for line in handle if not line.lstrip().startswith("#"))
-            reader = csv.DictReader(filtered, delimiter="\t")
-            if reader.fieldnames is None:
-                return {}
-            if sample_id_column not in reader.fieldnames:
-                raise ValueError(
-                    f"元数据文件缺少样本 ID 列 '{sample_id_column}'，"
-                    f"实际列: {reader.fieldnames}"
-                )
-            for row in reader:
-                rows.append(row)
+        lines = metadata_path.read_text(encoding="utf-8").splitlines()
+        header_index: int | None = None
+        for index, line in enumerate(lines):
+            stripped = line.strip()
+            if not stripped:
+                continue
+            # QIIME 风格表头以 # 开头，但它是表头而不是注释。
+            if stripped.startswith("#SampleID") or stripped.startswith("#sample-id"):
+                header_index = index
+                break
+            if stripped.startswith("#"):
+                continue
+            header_index = index
+            break
+
+        if header_index is None:
+            return {}
+
+        header_fields = [
+            _canonical_metadata_field(field)
+            for field in lines[header_index].lstrip("#").split("\t")
+        ]
+        id_column = _resolve_metadata_id_column(header_fields, sample_id_column)
+        if id_column is None:
+            raise ValueError(
+                f"元数据文件缺少样本 ID 列 '{sample_id_column}'，"
+                f"实际列: {header_fields}"
+            )
+
+        data_lines = [
+            line
+            for line in lines[header_index + 1 :]
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
+        reader = csv.DictReader(data_lines, fieldnames=header_fields, delimiter="\t")
 
         metadata: dict[str, dict[str, Any]] = {}
-        for row in rows:
-            sample_id = (row.get(sample_id_column) or "").strip()
+        for row in reader:
+            sample_id = (row.get(id_column) or "").strip()
             if not sample_id:
                 continue
             metadata[sample_id] = {
-                k: v for k, v in row.items() if k != sample_id_column
+                key: value for key, value in row.items() if key != id_column
             }
         return metadata
 

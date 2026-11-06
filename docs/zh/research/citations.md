@@ -53,6 +53,6 @@ const references = [
 
 ## 如何引用 MICOS-2024
 
-项目自身的引用方式请参考仓库中的 `CITATION.md`。如果使用了某一分析分支，也应同时引用相应工具论文。
+项目自身的引用方式请参考仓库中的 `CITATION.cff`（机器可读）和 `CITATION.md`（人读版本）。如果使用了某一分析分支，也应同时引用相应工具论文。
 
 <ReferenceList :items="references" />

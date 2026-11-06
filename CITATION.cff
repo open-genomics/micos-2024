@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use MICOS-2024 in your research, please cite this repository."
+title: "MICOS-2024: Metagenomic Intelligence and Comprehensive Omics Suite"
+abstract: "An end-to-end metagenomics CLI for quality control, taxonomic profiling, diversity analysis, functional annotation, run manifests, and self-contained HTML reports."
+type: software
+authors:
+  - name: "MICOS-2024 Team"
+  - name: "Open Genomics"
+repository-code: "https://github.com/open-genomics/micos-2024"
+url: "https://open-genomics.github.io/micos-2024/"
+license: MIT
+version: "1.2.0"
+date-released: "2026-11-06"
+keywords:
+  - metagenomics
+  - bioinformatics
+  - microbiome
+  - reproducible-research
+  - kraken2
+  - qiime2
+  - humann

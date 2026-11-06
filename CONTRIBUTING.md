@@ -85,7 +85,7 @@ Fixes #123
 ## 获取帮助
 
 - **GitHub Issues**：问题报告和功能讨论
-- **GitHub Discussions**：一般讨论和问答
+- **GitHub Issues**：一般讨论和问答（Discussions 尚未开启）
 - **文档**：查看[故障排除指南](docs/zh/troubleshooting.md)
 
 ## 许可证

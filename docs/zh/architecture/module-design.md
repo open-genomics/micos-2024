@@ -14,7 +14,7 @@ title: 模块设计原理
 
 `micos/cli.py` 使用 Click 框架，结构为两层命令组：
 
-- `main` group：`validate-config`、`full-run`
+- `main` group：`validate-config`、`doctor`、`full-run`
 - `run` group：`quality-control`、`taxonomic-profiling`、`diversity-analysis`、`functional-annotation`、`summarize-results`
 
 全局选项包括 `--config`、`--log-file`、`--verbose`、`--dry-run`。`full-run` 额外支持 `--skip-qc`、`--skip-taxonomy`、`--skip-functional`、`--skip-diversity` 跳过指定阶段。
@@ -28,6 +28,8 @@ run_qc → run_taxonomic_profiling → run_diversity_analysis → run_functional
 ```
 
 各阶段间通过 `results/` 子目录传递中间产物：KneadData 清洗读段 -> Kraken2 报告 -> BIOM 表 -> 多样性产物 -> HTML 汇总报告。
+
+`run_full_pipeline()` 在开始前创建 `results/run_manifest.json`，记录环境、数据库、输入文件与参数；每个阶段结束时更新阶段状态和耗时。阶段失败会写入 `failed` 状态后重新抛出，便于排错。
 
 ## 架构图
 
@@ -92,9 +94,27 @@ class AnalysisConfig(BaseModel):
 
 数据库路径通过 `merge_databases_config()` 从 `analysis.yaml` 和 `databases.yaml` 合并提取，支持两种来源：`paths.databases` 直接配置或 `databases.yaml` 分层配置。
 
-## 工具执行
+## 工具执行与错误边界
 
 `micos/utils.py` 的 `run_command_live()` 用 `subprocess.Popen` 执行外部工具，实时打印 stdout，失败时抛出 `subprocess.CalledProcessError`。各模块捕获该异常后记录错误日志并重新抛出。
+
+输入缺失采用 **fail-closed**：
+
+- 没有发现样本 -> `NoSamplesError`
+- 上游 BIOM 不存在 -> `MissingInputError`
+- 工具执行完成但没有预期产物 -> `StageOutputError`
+
+CLI 边界将 `MicosError` 映射为稳定退出码，不再把空输入当成成功。
+
+## 运行清单
+
+`micos/manifest.py` 定义 `RunManifest` 与 `StageRecord`，负责：
+
+- 生成可按时间排序的 `run_id`
+- 采集 MICOS/Python/平台/git commit 与外部工具版本
+- 记录数据库路径是否存在
+- 记录输入 FASTQ 的相对路径、大小和 mtime
+- 原子写入 `results/run_manifest.json`
 
 ## 返回码
 

@@ -177,9 +177,7 @@ class TestSampleMetadata:
     def test_load_metadata_missing_id_column_raises(self, tmp_path: Path) -> None:
         """表头缺少 sample-id 列时应抛出 ValueError。"""
         tsv = tmp_path / "samples.tsv"
-        tsv.write_text(
-            "id\tgroup\nS001\tControl\n", encoding="utf-8"
-        )
+        tsv.write_text("id\tgroup\nS001\tControl\n", encoding="utf-8")
 
         with pytest.raises(ValueError, match="sample-id"):
             Sample.load_metadata(tsv)
@@ -187,9 +185,7 @@ class TestSampleMetadata:
     def test_load_metadata_custom_id_column(self, tmp_path: Path) -> None:
         """应支持自定义 sample_id_column。"""
         tsv = tmp_path / "samples.tsv"
-        tsv.write_text(
-            "id\tgroup\nS001\tControl\n", encoding="utf-8"
-        )
+        tsv.write_text("id\tgroup\nS001\tControl\n", encoding="utf-8")
 
         metadata = Sample.load_metadata(tsv, sample_id_column="id")
 
@@ -201,6 +197,31 @@ class TestSampleMetadata:
         tsv.write_text("", encoding="utf-8")
 
         assert Sample.load_metadata(tsv) == {}
+
+    def test_load_metadata_qiime_sample_id_header(self, tmp_path: Path) -> None:
+        """应兼容 QIIME 风格的 #SampleID 表头。"""
+        tsv = tmp_path / "metadata.tsv"
+        tsv.write_text(
+            "#SampleID\ttreatment\n" "S001\tControl\n" "S002\tDrugA\n",
+            encoding="utf-8",
+        )
+
+        metadata = Sample.load_metadata(tsv)
+
+        assert metadata == {
+            "S001": {"treatment": "Control"},
+            "S002": {"treatment": "DrugA"},
+        }
+
+    def test_load_metadata_bundled_example(self) -> None:
+        """仓库自带示例元数据应可直接加载。"""
+        project_root = Path(__file__).resolve().parents[1]
+        metadata = Sample.load_metadata(
+            project_root / "data" / "raw_input" / "metadata.tsv"
+        )
+
+        assert "SRR8291345_Control_T12-1" in metadata
+        assert metadata["SRR8291345_Control_T12-1"]["treatment"] == "Control"
 
     def test_discover_paired_with_metadata_join(self, tmp_path: Path) -> None:
         """discover_paired 应按 sample-id join 元数据。"""
@@ -234,9 +255,7 @@ class TestSampleMetadata:
         (tmp_path / "S003_R2.fastq.gz").write_text("r2")
 
         meta = tmp_path / "samples.tsv"
-        meta.write_text(
-            "sample-id\tgroup\nS001\tControl\n", encoding="utf-8"
-        )
+        meta.write_text("sample-id\tgroup\nS001\tControl\n", encoding="utf-8")
 
         samples = Sample.discover_paired(tmp_path, metadata_path=meta)
 
@@ -260,9 +279,7 @@ class TestSampleMetadata:
         (tmp_path / "S001_paired_2.fastq").write_text("r2")
 
         meta = tmp_path / "samples.tsv"
-        meta.write_text(
-            "sample-id\tgroup\nS001\tControl\n", encoding="utf-8"
-        )
+        meta.write_text("sample-id\tgroup\nS001\tControl\n", encoding="utf-8")
 
         samples = Sample.discover_cleaned(tmp_path, metadata_path=meta)
 
@@ -276,16 +293,13 @@ class TestSampleMetadata:
 
         meta = tmp_path / "samples.tsv"
         meta.write_text(
-            "# 注释行\n"
-            "sample-id\tgroup\n"
-            "S001\tControl\n",
+            "# 注释行\n" "sample-id\tgroup\n" "S001\tControl\n",
             encoding="utf-8",
         )
 
         samples = Sample.discover_paired(tmp_path, metadata_path=meta)
 
         assert samples[0].metadata["group"] == "Control"
-
 
 
 class TestSampleValidation:
@@ -359,8 +373,12 @@ class TestExtractSampleName:
 
     def test_extract_with_different_extensions(self) -> None:
         """处理不同的扩展名。"""
-        assert Sample._extract_sample_name("sample_R1.fq.gz", "*_R1.fastq.gz") == "sample"
-        assert Sample._extract_sample_name("sample_R1.fastq", "*_R1.fastq.gz") == "sample"
+        assert (
+            Sample._extract_sample_name("sample_R1.fq.gz", "*_R1.fastq.gz") == "sample"
+        )
+        assert (
+            Sample._extract_sample_name("sample_R1.fastq", "*_R1.fastq.gz") == "sample"
+        )
 
     def test_extract_cleaned_sample_name(self) -> None:
         """从清洗后的文件名提取样本名。"""

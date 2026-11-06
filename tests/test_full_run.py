@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -207,3 +208,58 @@ def test_run_full_pipeline_skips_selected_stage(
 
     assert skipped_call not in called
     assert "summary" in called
+
+
+def test_run_full_pipeline_writes_run_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """完整流程应写入 run_manifest.json 并记录阶段。"""
+    _stub_pipeline_stages(monkeypatch)
+
+    results_dir = tmp_path / "results"
+    full_run.run_full_pipeline(
+        input_dir=str(tmp_path / "input"),
+        results_dir=str(results_dir),
+        threads=4,
+        kneaddata_db="/db/kneaddata",
+        kraken2_db="/db/kraken2",
+    )
+
+    manifest_path = results_dir / "run_manifest.json"
+    assert manifest_path.exists()
+    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert data["status"] == "completed"
+    assert data["parameters"]["threads"] == 4
+    assert [stage["name"] for stage in data["stages"]] == [
+        "质量控制",
+        "物种分类",
+        "多样性分析",
+        "功能注释",
+        "结果汇总",
+    ]
+    assert all(stage["status"] == "completed" for stage in data["stages"])
+
+def test_run_full_pipeline_marks_manifest_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """阶段失败时 manifest 应记录 failed 状态并保留错误。"""
+    def failing_qc(**kwargs):
+        raise RuntimeError("fastqc 未安装")
+
+    monkeypatch.setattr(full_run, "run_qc", failing_qc)
+
+    results_dir = tmp_path / "results"
+    with pytest.raises(RuntimeError, match="fastqc"):
+        full_run.run_full_pipeline(
+            input_dir=str(tmp_path / "input"),
+            results_dir=str(results_dir),
+            threads=4,
+            kneaddata_db="/db/kneaddata",
+            kraken2_db="/db/kraken2",
+        )
+
+    data = json.loads((results_dir / "run_manifest.json").read_text(encoding="utf-8"))
+    assert data["status"] == "failed"
+    assert data["stages"][0]["name"] == "质量控制"
+    assert data["stages"][0]["status"] == "failed"
+    assert "fastqc" in data["stages"][0]["error"]

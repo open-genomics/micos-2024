@@ -66,7 +66,9 @@ class FakeSample:
 | `test_diversity_analysis.py` | QIIME2 命令拼装 |
 | `test_functional_annotation.py` | HUMAnN 命令拼装 |
 | `test_summarize_results.py` | HTML 报告生成 |
-| `test_full_run.py` | 流程编排和步骤跳过 |
+| `test_full_run.py` | 流程编排、步骤跳过和 run manifest |
+| `test_manifest.py` | 运行清单字段与输入记录 |
+| `test_doctor.py` | 工具/路径自检 |
 | `test_shell_wrappers.py` | Shell 包装层回归 |
 | `test_orchestration_docs.py` | 编排口径的文档一致性（CLI 唯一生产编排、WDL 实验性、不支持断点续传） |
 | `test_docs_whitepaper.py` | 文档站组件和页面完整性 |
@@ -93,11 +95,13 @@ pytest tests/ -v        # 全部测试
 
 ## 覆盖率
 
-CI 中覆盖率阈值为 55%：
+CI 中覆盖率阈值为 80%：
 
 ```bash
-pytest tests/ --cov=micos --cov-report=xml --cov-fail-under=55
+pytest tests/ --cov=micos --cov-report=xml --cov-fail-under=80
 ```
+
+当前本地覆盖率为 87% 左右（以实际运行结果为准）。
 
 生成本地覆盖率报告：
 
@@ -119,4 +123,4 @@ def test_xxx(tmp_path, monkeypatch):
 
 ## CI 集成
 
-GitHub Actions 在 Python 3.10/3.11 两个版本上运行测试矩阵，执行 Black、isort、Flake8、MyPy 检查和 pytest，覆盖率上传至 Codecov。
+GitHub Actions 在 Python 3.10/3.11/3.12 三个版本上运行测试矩阵，执行 Black、isort、Flake8、MyPy 检查和 pytest，覆盖率上传至 Codecov。

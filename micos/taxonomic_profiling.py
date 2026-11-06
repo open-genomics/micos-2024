@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+from micos.errors import NoSamplesError, StageOutputError
 from micos.sample import Sample
 from micos.utils import run_command_live
 
@@ -50,8 +51,10 @@ def run_taxonomic_profiling(
     metadata_arg = Path(metadata_path) if metadata_path else None
     samples = Sample.discover_cleaned(input_path, metadata_path=metadata_arg)
     if not samples:
-        logger.warning("在输入目录中未找到清洗后的配对样本文件，跳过 Kraken2。")
-        return
+        raise NoSamplesError(
+            f"在 {input_path} 中未找到 KneadData 清洗后的配对样本；"
+            "期望命名形如 sample_paired_1.fastq / sample_paired_2.fastq。"
+        )
 
     # 2. 运行 Kraken2
     logger.info("--> 正在运行 Kraken2...")
@@ -82,12 +85,11 @@ def run_taxonomic_profiling(
         ]
         run_command_live(kraken2_cmd)
 
-    report_files = list(output_path.glob("*.report"))
+    report_files = sorted(output_path.glob("*.report"))
     if not report_files:
-        logger.warning("未找到 Kraken2 报告文件，跳过 BIOM 文件生成。")
-        logger.warning("未找到 Kraken2 报告文件，跳过 Krona 图表生成。")
-        logger.info("物种分类分析完成。")
-        return
+        raise StageOutputError(
+            f"Kraken2 执行完成，但 {output_path} 中没有生成任何 .report 文件。"
+        )
 
     logger.info("--> 正在生成 BIOM 文件...")
     biom_output = output_path / "feature-table.biom"

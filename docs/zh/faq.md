@@ -12,6 +12,17 @@ title: 常见问题
 
 不是。很多脚本是专家扩展或探索性能力。稳定的命令面请看 [CLI 参考](./reference/cli.md)。
 
+## 输入目录为空时为什么直接失败
+
+这是有意的 fail-closed 行为。没有发现样本、上游 BIOM 缺失或阶段未生成预期产物时，
+`micos` 会以非零退出码结束，避免自动化流水线把“空结果”当成成功。先检查 FASTQ
+命名是否为 `sample_R1.fastq.gz` / `sample_R2.fastq.gz`，或运行 `micos doctor` 检查环境。
+
+## run_manifest.json 有什么用
+
+它记录一次运行的工具版本、数据库路径、输入文件、参数和阶段状态/耗时。报告页也会读取
+并展示其中信息。当前不支持断点续传；失败时保留 `results/` 和 manifest 便于排错。
+
 ## 新项目应该优先用包装脚本还是 Python CLI
 
 优先用 Python CLI。包装脚本适合兼容旧工作流，但不是新项目的事实标准。

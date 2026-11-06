@@ -3,7 +3,10 @@
 
 from pathlib import Path
 
+import pytest
+
 from micos import quality_control
+from micos.errors import NoSamplesError
 
 
 def test_run_qc_assembles_fastqc_and_kneaddata_commands(tmp_path, monkeypatch):
@@ -47,8 +50,8 @@ def test_run_qc_assembles_fastqc_and_kneaddata_commands(tmp_path, monkeypatch):
     assert "sample001" in kneaddata_cmd
 
 
-def test_run_qc_skips_when_no_samples(tmp_path, monkeypatch):
-    """输入目录无配对样本时应直接返回，不调用任何命令."""
+def test_run_qc_fails_when_no_samples(tmp_path, monkeypatch):
+    """输入目录无配对样本时应 fail-closed，不调用任何命令."""
     commands = []
     monkeypatch.setattr(
         quality_control, "run_command_live", lambda cmd: commands.append(list(cmd))
@@ -58,15 +61,16 @@ def test_run_qc_skips_when_no_samples(tmp_path, monkeypatch):
     input_dir.mkdir()
     output_dir = tmp_path / "output"
 
-    quality_control.run_qc(
-        input_dir=input_dir,
-        output_dir=output_dir,
-        threads=4,
-        kneaddata_db="/db/kneaddata",
-    )
+    with pytest.raises(NoSamplesError, match="未找到"):
+        quality_control.run_qc(
+            input_dir=input_dir,
+            output_dir=output_dir,
+            threads=4,
+            kneaddata_db="/db/kneaddata",
+        )
 
     assert commands == []
-    # 输出目录仍应被创建
+    # 输出目录在发现样本前创建，便于后续排错
     assert (output_dir / "fastqc_reports").exists()
     assert (output_dir / "kneaddata").exists()
 
@@ -91,12 +95,13 @@ def test_run_qc_passes_metadata_path_to_sample_discovery(tmp_path, monkeypatch):
 
     input_dir = tmp_path / "input"
     input_dir.mkdir()
-    quality_control.run_qc(
-        input_dir=input_dir,
-        output_dir=tmp_path / "output",
-        threads=4,
-        kneaddata_db="/db/kneaddata",
-        metadata_path="config/samples.tsv",
-    )
+    with pytest.raises(NoSamplesError):
+        quality_control.run_qc(
+            input_dir=input_dir,
+            output_dir=tmp_path / "output",
+            threads=4,
+            kneaddata_db="/db/kneaddata",
+            metadata_path="config/samples.tsv",
+        )
 
     assert captured["metadata_path"] == Path("config/samples.tsv")

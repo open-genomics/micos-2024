@@ -35,6 +35,7 @@ def test_key_pages_exist() -> None:
         DOCS_ROOT / "zh" / "analysis" / "diversity-analysis.md",
         DOCS_ROOT / "zh" / "analysis" / "functional-profiling.md",
         DOCS_ROOT / "zh" / "research" / "citations.md",
+        DOCS_ROOT / "zh" / "research" / "competition.md",
     ]
 
     for page in expected_pages:

@@ -16,6 +16,7 @@
 .env.local
 .env.*.local
 venv/
+.venv/
 env/
 ENV/
 env.bak/
@@ -185,6 +186,3 @@ indices/
 docs/node_modules/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
-
-# setuptools-scm 自动生成，不入库
-micos/_version.py

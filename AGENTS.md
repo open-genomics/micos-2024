@@ -21,8 +21,7 @@
 
 ```
 micos/
-├── __init__.py              # 包初始化
-├── _version.py              # 版本号 (自动生成)
+├── __init__.py              # 包初始化与版本号
 ├── cli.py                   # Click CLI 入口
 ├── config.py                # Pydantic 配置模型
 ├── sample.py                # 样本数据模型

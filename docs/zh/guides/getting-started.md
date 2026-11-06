@@ -10,7 +10,7 @@ title: 快速开始
 | --- | --- | --- |
 | Python CLI | 本地开发、可控环境 | `micos` 或 `python -m micos.cli` |
 | Shell 包装层 | 兼容旧用法 | `scripts/run_full_analysis.sh`, `scripts/run_module.sh` |
-| 工作流与容器 | 集成部署、可重现环境 | `steps/`, `containers/` |
+| 工作流与容器 | 实验性/部分步骤参考 | `steps/`, `containers/` |
 
 ## 安装
 
@@ -20,7 +20,15 @@ cd micos-2024
 pip install -e ".[dev]"
 ```
 
-也可以使用 Conda / Mamba 和仓库中的 `environment.yml`。
+也可以使用 Conda / Mamba：
+
+```bash
+mamba env create -f environment.yml
+conda activate micos-2024
+pip install -e .
+```
+
+`environment.yml` 安装外部生信工具，`pip install -e .` 安装 `micos` 命令本身，两步都需要。
 
 ## 配置
 
@@ -31,6 +39,15 @@ cp config/samples.tsv.template config/samples.tsv
 ```
 
 然后把数据库路径改成你本地真实可用的位置。
+
+## 环境自检
+
+```bash
+micos doctor
+micos doctor --json
+```
+
+`doctor` 会检查外部工具、Kraken2/KneadData 数据库路径和 Python 环境。
 
 ## 验证配置
 
@@ -76,4 +93,5 @@ sudo singularity build kraken2.sif steps/03_taxonomic_profiling_kraken/kraken2.d
 - `results/taxonomic_profiling/`
 - `results/diversity_analysis/`
 - `results/functional_annotation/`
+- `results/run_manifest.json`
 - `results/micos_summary_report.html`

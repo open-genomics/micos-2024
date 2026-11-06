@@ -30,6 +30,16 @@ micos [全局选项] <命令> [命令选项]
 micos validate-config --config config/analysis.yaml
 ```
 
+## `doctor`
+
+```bash
+micos doctor
+micos doctor --json
+micos doctor --kneaddata-db /db/kneaddata/human_genome --kraken2-db /db/kraken2/standard
+```
+
+检查外部工具、数据库路径和 Python 环境。缺少工具或提供的路径不存在时返回非零退出码。
+
 ## `full-run`
 
 ```bash
@@ -43,8 +53,11 @@ micos full-run \
 
 跳过参数：`--skip-qc`、`--skip-taxonomy`、`--skip-functional`、`--skip-diversity`
 
-可选参数：`--metadata` 指定样本元数据 TSV（`sample-id` 列与 FASTQ 文件名 join，
+可选参数：`--metadata` 指定样本元数据 TSV（`sample-id` 或 `#SampleID` 列与 FASTQ 文件名 join，
 模板见 `config/samples.tsv.template`）。
+
+运行后会在结果目录写出 `run_manifest.json`（版本、数据库、输入、参数、阶段状态）和
+`micos_summary_report.html`（自包含 HTML 报告）。
 
 ## `run quality-control`
 
@@ -109,5 +122,5 @@ micos run summarize-results \
 | `3` | 配置错误 |
 | `4` | 缺少依赖 |
 | `5` | 数据库错误 |
-| `6` | I/O 错误 |
+| `6` | 输入/IO 错误（含未发现样本、上游文件缺失） |
 | `130` | 用户中断 |

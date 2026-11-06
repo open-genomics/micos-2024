@@ -128,6 +128,7 @@ check_core_tools() {
 check_python_packages() {
     log_info "检查Python包..."
     
+    test_command "micos" "MICOS CLI"
     test_python_package "numpy" "NumPy"
     test_python_package "pandas" "Pandas"
     test_python_package "scipy" "SciPy"

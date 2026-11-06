@@ -14,6 +14,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from micos.errors import NoSamplesError
 from micos.sample import Sample
 from micos.utils import run_command_live
 
@@ -54,8 +55,10 @@ def run_functional_annotation(
     metadata_arg = Path(metadata_path) if metadata_path else None
     samples = Sample.discover_cleaned(input_path, metadata_path=metadata_arg)
     if not samples:
-        logger.warning("警告: 在输入目录中未找到清洗后的配对样本文件，跳过 HUMAnN。")
-        return
+        raise NoSamplesError(
+            f"在 {input_path} 中未找到 KneadData 清洗后的配对样本；"
+            "期望命名形如 sample_paired_1.fastq / sample_paired_2.fastq。"
+        )
 
     # 2. 为每个样本准备 HUMAnN 输入并运行
     for sample in samples:

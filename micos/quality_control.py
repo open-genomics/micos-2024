@@ -12,6 +12,7 @@ import logging
 import subprocess
 from pathlib import Path
 
+from micos.errors import NoSamplesError
 from micos.sample import Sample
 from micos.utils import run_command_live
 
@@ -57,8 +58,10 @@ def run_qc(
     metadata_arg = Path(metadata_path) if metadata_path else None
     samples = Sample.discover_paired(input_path, metadata_path=metadata_arg)
     if not samples:
-        logger.warning("在输入目录中未找到配对的 FASTQ 文件。")
-        return
+        raise NoSamplesError(
+            f"在 {input_path} 中未找到配对的 FASTQ 文件；"
+            "期望命名形如 sample_R1.fastq.gz / sample_R2.fastq.gz。"
+        )
 
     if metadata_arg:
         matched = sum(1 for s in samples if s.metadata)

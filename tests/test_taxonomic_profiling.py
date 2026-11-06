@@ -3,7 +3,10 @@
 
 from pathlib import Path
 
+import pytest
+
 from micos import taxonomic_profiling
+from micos.errors import NoSamplesError
 
 
 def test_run_taxonomic_profiling_assembles_kraken2_biom_and_krona_commands(
@@ -58,8 +61,8 @@ def test_run_taxonomic_profiling_assembles_kraken2_biom_and_krona_commands(
     assert "-o" in krona_cmd
 
 
-def test_run_taxonomic_profiling_skips_when_no_samples(tmp_path, monkeypatch):
-    """无样本时应直接返回，不调用任何命令."""
+def test_run_taxonomic_profiling_fails_when_no_samples(tmp_path, monkeypatch):
+    """无样本时应 fail-closed，不调用任何命令."""
     commands = []
     monkeypatch.setattr(
         taxonomic_profiling,
@@ -71,12 +74,13 @@ def test_run_taxonomic_profiling_skips_when_no_samples(tmp_path, monkeypatch):
     input_dir.mkdir()
     output_dir = tmp_path / "output"
 
-    taxonomic_profiling.run_taxonomic_profiling(
-        input_dir=input_dir,
-        output_dir=output_dir,
-        threads=4,
-        kraken2_db="/db/kraken2",
-    )
+    with pytest.raises(NoSamplesError, match="未找到"):
+        taxonomic_profiling.run_taxonomic_profiling(
+            input_dir=input_dir,
+            output_dir=output_dir,
+            threads=4,
+            kraken2_db="/db/kraken2",
+        )
 
     assert commands == []
 
@@ -100,12 +104,13 @@ def test_run_taxonomic_profiling_passes_metadata_path(tmp_path, monkeypatch):
 
     input_dir = tmp_path / "input"
     input_dir.mkdir()
-    taxonomic_profiling.run_taxonomic_profiling(
-        input_dir=input_dir,
-        output_dir=tmp_path / "output",
-        threads=4,
-        kraken2_db="/db/kraken2",
-        metadata_path="config/samples.tsv",
-    )
+    with pytest.raises(NoSamplesError):
+        taxonomic_profiling.run_taxonomic_profiling(
+            input_dir=input_dir,
+            output_dir=tmp_path / "output",
+            threads=4,
+            kraken2_db="/db/kraken2",
+            metadata_path="config/samples.tsv",
+        )
 
     assert captured["metadata_path"] == Path("config/samples.tsv")

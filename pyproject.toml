@@ -1,9 +1,10 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "micos-2024"
+version = "1.2.0"
 description = "MICOS-2024: Metagenomic Intelligence and Comprehensive Omics Suite"
 readme = "README.md"
 license = {text = "MIT"}
@@ -19,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 requires-python = ">=3.10"
@@ -28,8 +30,6 @@ dependencies = [
     "pydantic>=2.0.0",
     "typing_extensions>=4.0.0",
 ]
-dynamic = ["version"]
-
 [project.optional-dependencies]
 dev = [
     "pytest>=6.2.0",
@@ -57,7 +57,7 @@ scripts = [
 [project.urls]
 Homepage = "https://github.com/open-genomics/micos-2024"
 Repository = "https://github.com/open-genomics/micos-2024"
-Documentation = "https://lessup.github.io/micos-2024/"
+Documentation = "https://open-genomics.github.io/micos-2024/"
 "Bug Tracker" = "https://github.com/open-genomics/micos-2024/issues"
 
 [project.scripts]
@@ -65,9 +65,6 @@ micos = "micos.cli:main"
 
 [tool.setuptools]
 packages = ["micos"]
-
-[tool.setuptools_scm]
-write_to = "micos/_version.py"
 
 [tool.black]
 line-length = 88

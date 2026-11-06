@@ -144,6 +144,7 @@ export default withMermaid(defineConfig({
               items: [
                 { text: '参考文献', link: '/zh/research/citations' },
                 { text: '相关开源项目', link: '/zh/research/related-projects' },
+                { text: '项目起源', link: '/zh/research/competition' },
                 { text: '演进思考', link: '/zh/research/evolution-notes' },
               ],
             },
@@ -156,7 +157,7 @@ export default withMermaid(defineConfig({
         docFooter: { prev: '上一页', next: '下一页' },
         footer: {
           message: 'MICOS-2024 宏基因组分析平台',
-          copyright: 'MIT License · holtwood / MICOS-2024',
+          copyright: 'MIT License · Open Genomics / MICOS-2024',
         },
       },
     },

@@ -2,7 +2,7 @@
 
 ## 如何引用MICOS-2024
 
-如果您在研究中使用了MICOS-2024，请按照以下格式引用：
+机器可读的引用元数据见 [`CITATION.cff`](CITATION.cff)。如果您在研究中使用了 MICOS-2024，请按照以下格式引用：
 
 ### APA格式
 
@@ -19,7 +19,7 @@ GitHub repository. https://github.com/open-genomics/micos-2024
   author = {{MICOS-2024 Team}},
   year = {2024},
   url = {https://github.com/open-genomics/micos-2024},
-  note = {华大基因"猛犸杯"生物信息学竞赛参赛项目}
+  note = {2024 "猛犸杯" 生物信息学竞赛参赛项目，现由 Open Genomics 维护}
 }
 ```
 

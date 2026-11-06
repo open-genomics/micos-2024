@@ -43,9 +43,11 @@ micos run diversity-analysis \
 
 ```
 results/diversity_analysis/
-├── feature-table.qza     # QIIME2 特征表
-├── shannon.qza           # Shannon Alpha 多样性
-└── bray-curtis.qza       # Bray-Curtis Beta 多样性距离矩阵
+├── feature-table.qza
+├── shannon.qza
+├── bray-curtis.qza
+├── alpha_diversity/alpha-diversity.tsv   # 可直接用于绘图/统计
+└── beta_diversity/distance-matrix.tsv    # 样本间距离矩阵
 ```
 
 ## 结果解读
@@ -60,7 +62,7 @@ Shannon 值越高表示样本内多样性越高。人类肠道样本的典型范
 
 ## 扩展指标
 
-QIIME2 支持更多多样性指标（Simpson、Chao1、UniFrac 等）和排序分析（PCoA、NMDS）。MICOS-2024 当前仅集成 Shannon 和 Bray-Curtis，如需其他指标可直接操作生成的 `.qza` 文件。
+QIIME2 支持更多多样性指标（Simpson、Chao1、UniFrac 等）和排序分析（PCoA、NMDS）。MICOS-2024 当前仅集成 Shannon 和 Bray-Curtis，并导出 Alpha TSV 与 Beta 距离矩阵 TSV；如需其他指标可直接操作生成的 `.qza` 文件。
 
 ## 相关文档
 

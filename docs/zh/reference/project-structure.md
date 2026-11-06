@@ -29,7 +29,22 @@ micos/
 ├── summarize_results.py
 ├── sample.py
 ├── config.py
+├── manifest.py
+├── doctor.py
+├── errors.py
 └── utils.py
+```
+
+## 运行产物
+
+```text
+results/
+├── run_manifest.json
+├── micos_summary_report.html
+├── quality_control/
+├── taxonomic_profiling/
+├── diversity_analysis/
+└── functional_annotation/
 ```
 
 ## 扩展脚本

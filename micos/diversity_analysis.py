@@ -12,6 +12,7 @@ import logging
 import subprocess
 from pathlib import Path
 
+from micos.errors import MissingInputError
 from micos.utils import run_command_live
 
 logger = logging.getLogger(__name__)
@@ -41,8 +42,7 @@ def run_diversity_analysis(
     output_path.mkdir(parents=True, exist_ok=True)
 
     if not input_biom_path.exists():
-        logger.warning(f"未找到 BIOM 文件: {input_biom}，跳过多样性分析。")
-        return
+        raise MissingInputError(f"未找到多样性分析所需的 BIOM 文件: {input_biom_path}")
 
     # 1. 导入数据到 QIIME2
     logger.info("--> 正在导入 BIOM 表到 QIIME2...")
@@ -85,6 +85,21 @@ def run_diversity_analysis(
         logger.error(f"QIIME2 Alpha 多样性分析失败: {e}")
         raise
 
+    logger.info("--> 正在导出 Alpha 多样性表...")
+    alpha_export_dir = output_path / "alpha_diversity"
+    alpha_export_dir.mkdir(parents=True, exist_ok=True)
+    run_command_live(
+        [
+            "qiime",
+            "tools",
+            "export",
+            "--input-path",
+            str(alpha_div_qza),
+            "--output-path",
+            str(alpha_export_dir),
+        ]
+    )
+
     # 3. Beta 多样性
     logger.info("--> 正在计算 Beta 多样性 (Bray-Curtis)...")
     beta_div_qza = output_path / "bray-curtis.qza"
@@ -104,5 +119,20 @@ def run_diversity_analysis(
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.error(f"QIIME2 Beta 多样性分析失败: {e}")
         raise
+
+    logger.info("--> 正在导出 Beta 距离矩阵...")
+    beta_export_dir = output_path / "beta_diversity"
+    beta_export_dir.mkdir(parents=True, exist_ok=True)
+    run_command_live(
+        [
+            "qiime",
+            "tools",
+            "export",
+            "--input-path",
+            str(beta_div_qza),
+            "--output-path",
+            str(beta_export_dir),
+        ]
+    )
 
     logger.info("多样性分析完成。")

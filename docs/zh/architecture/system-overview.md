@@ -4,14 +4,14 @@ title: 系统总览
 
 # 系统总览
 
-MICOS-2024 是一个围绕宏基因组工具栈构建的 Python CLI 平台，串联质量控制、物种分类、多样性分析和功能注释五个阶段。仓库同时包含 WDL 工作流资产和 Singularity 容器定义，用于可重现部署。
+MICOS-2024 是一个围绕宏基因组工具栈构建的 Python CLI 平台，串联质量控制、物种分类、多样性分析和功能注释五个阶段。每次 `full-run` 都会写出 `run_manifest.json`；仓库同时包含实验性 WDL 单步骤资产和部分步骤的 Singularity 容器定义。
 
 ## 分层地图
 
 | 层级 | 关键路径 | 职责 |
 | --- | --- | --- |
 | 入口命令 | `micos/cli.py`, `pyproject.toml` | 面向用户和自动化的命令面 |
-| Python 编排 | `micos/*.py` | 串联质控、分类、多样性、功能注释、汇总 |
+| Python 编排 | `micos/*.py` | 串联质控、分类、多样性、功能注释、汇总，并写出 run manifest |
 | Shell 包装层 | `scripts/run_full_analysis.sh`, `scripts/run_module.sh` | 委托给 CLI 的便捷入口 |
 | 工作流资产 | `steps/**/*.wdl` | 步骤级可移植工作流定义 |
 | 环境资产 | `containers/singularity/` | 可重现运行环境 |
@@ -36,7 +36,7 @@ MICOS-2024 是一个围绕宏基因组工具栈构建的 Python CLI 平台，串
 micos full-run --input-dir data/raw_input --results-dir results
 ```
 
-`full-run` 串行执行五个阶段：质量控制 → 物种分类 → 多样性分析 → 功能注释 → 结果汇总。每个阶段也可以通过 `micos run <module>` 单独执行，支持 `--skip-*` 参数跳过指定阶段。
+`full-run` 串行执行五个阶段：质量控制 → 物种分类 → 多样性分析 → 功能注释 → 结果汇总。每个阶段也可以通过 `micos run <module>` 单独执行，支持 `--skip-*` 参数跳过指定阶段。运行前可用 `micos doctor` 检查工具与数据库路径。
 
 ### Shell 包装路径
 
@@ -86,4 +86,8 @@ flowchart TB
 
 ### 环境漂移
 
-容器、工作流和直接 CLI 描述的是不同现实时，可重现性会被削弱。文档按层分开说明，不混写。
+容器、工作流和直接 CLI 描述的是不同现实时，可重现性会被削弱。文档按层分开说明，不混写。运行后先查看 `results/run_manifest.json` 中的工具版本、数据库路径和阶段状态。
+
+### 空输入被当成成功
+
+旧行为在输入目录没有样本时只记录 warning 并返回。当前模块采用 fail-closed：`NoSamplesError` / `MissingInputError` 会以非零退出码结束，避免自动化流水线产出“空成功”。

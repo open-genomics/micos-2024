@@ -14,9 +14,9 @@ MICOS-2024 支持多种部署方式，不同模式服务于不同目标。
 
 适合保持旧有 shell-first 工作流、渐进迁移到主 CLI 的场景。包装脚本委托给 CLI，不是独立流程实现。
 
-## 工作流驱动执行
+## 工作流驱动执行（实验性）
 
-适合需要 workflow engine 集成、显式表达步骤图的场景。相关资产：
+适合需要 workflow engine 集成、显式表达步骤图的场景。相关资产是**实验性单步骤参考**，不是生产工作流：
 
 - `steps/01_quality_control/fastqc.wdl`
 - `steps/02_read_cleaning/kneaddata.wdl`
@@ -25,9 +25,9 @@ MICOS-2024 支持多种部署方式，不同模式服务于不同目标。
 - `steps/05_taxonomic_visualization_krona/krona.wdl`
 - `steps/06_qiime2_analysis/*.wdl`
 
-## 容器化执行
+## 容器化执行（部分步骤）
 
-适合固定依赖栈、团队交付、防止环境漂移的场景。相关资产：
+适合固定依赖栈、团队交付、防止环境漂移的场景。当前只覆盖部分步骤，不是统一全流程镜像：
 
 - `containers/singularity/*.def`
 
