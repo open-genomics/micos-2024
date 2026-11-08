@@ -47,6 +47,7 @@ cd micos-2024
 uv sync --extra dev
 uv run micos doctor
 
+# 数据库路径为占位符，请替换为本机真实目录
 uv run micos full-run \
   --input-dir data/raw_input \
   --results-dir results \
@@ -106,7 +107,12 @@ graph LR
 阶段顺序、跳过开关和参数来源可以通过 dry-run 查看：
 
 ```bash
-micos --dry-run full-run --input-dir data/raw_input --results-dir results
+# 数据库路径为占位符，请替换为本机真实目录
+micos --dry-run full-run \
+  --input-dir data/raw_input \
+  --results-dir results \
+  --kneaddata-db /path/to/kneaddata_db \
+  --kraken2-db /path/to/kraken2/standard
 ```
 
 ## 输出说明

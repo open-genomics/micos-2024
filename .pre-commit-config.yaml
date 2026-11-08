@@ -72,7 +72,8 @@ repos:
   #     YAML 语法正确性由 pre-commit-hooks.check-yaml 保证。
 
   # 安全性检查
-  # 注: 仅检查不输出报告文件，避免污染工作区。CI 中有独立 bandit 步骤输出报告。
+  # 注: 仅检查不输出报告文件，避免污染工作区。CI 未运行 bandit，
+  #     需在本地执行 pre-commit 或 bandit。
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.4
     hooks:

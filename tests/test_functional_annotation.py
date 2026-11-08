@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """测试功能注释模块（命令拼装层）。"""
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -39,6 +40,30 @@ def test_run_functional_annotation_assembles_humann_command(tmp_path, monkeypatc
     assert humann_cmd[humann_cmd.index("--output-basename") + 1] == "sample001"
 
     # 临时输入目录应被清理
+    assert not (output_dir / "temp_humann_input").exists()
+
+
+def test_run_functional_annotation_cleans_temp_input_on_failure(tmp_path, monkeypatch):
+    """HUMAnN 失败时也应清理 temp_humann_input 临时目录."""
+
+    def failing_run(cmd):
+        raise subprocess.CalledProcessError(1, cmd)
+
+    monkeypatch.setattr(functional_annotation, "run_command_live", failing_run)
+
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    (input_dir / "sample001_paired_1.fastq").write_text("r1")
+    (input_dir / "sample001_paired_2.fastq").write_text("r2")
+
+    output_dir = tmp_path / "output"
+    with pytest.raises(subprocess.CalledProcessError):
+        functional_annotation.run_functional_annotation(
+            input_dir=input_dir,
+            output_dir=output_dir,
+            threads=8,
+        )
+
     assert not (output_dir / "temp_humann_input").exists()
 
 

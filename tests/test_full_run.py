@@ -239,10 +239,12 @@ def test_run_full_pipeline_writes_run_manifest(
     ]
     assert all(stage["status"] == "completed" for stage in data["stages"])
 
+
 def test_run_full_pipeline_marks_manifest_failed(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """阶段失败时 manifest 应记录 failed 状态并保留错误。"""
+
     def failing_qc(**kwargs):
         raise RuntimeError("fastqc 未安装")
 
@@ -263,3 +265,46 @@ def test_run_full_pipeline_marks_manifest_failed(
     assert data["stages"][0]["name"] == "质量控制"
     assert data["stages"][0]["status"] == "failed"
     assert "fastqc" in data["stages"][0]["error"]
+
+
+def test_skip_qc_feeds_input_dir_to_downstream(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--skip-qc 时物种分类/功能注释直接读取 input_dir，而不是不存在的 kneaddata 目录."""
+    called: list[CallRecord] = []
+    _stub_pipeline_stages(monkeypatch, lambda entry: called.append(entry))
+
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    full_run.run_full_pipeline(
+        input_dir=str(input_dir),
+        results_dir=str(tmp_path / "results"),
+        threads=4,
+        kneaddata_db=None,
+        kraken2_db="/db/kraken2",
+        skip_qc=True,
+    )
+
+    names = [entry[0] for entry in called]
+    assert "qc" not in names
+    tax = next(entry for entry in called if entry[0] == "tax")
+    func = next(entry for entry in called if entry[0] == "func")
+    assert tax[1] == str(input_dir)
+    assert func[1] == str(input_dir)
+
+
+def test_skip_taxonomy_without_biom_explains_requirement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--skip-taxonomy 且未跳过多样性时，缺失 BIOM 的错误应指向前置条件."""
+    _stub_pipeline_stages(monkeypatch)
+
+    with pytest.raises(full_run.MissingInputError, match="--skip-diversity"):
+        full_run.run_full_pipeline(
+            input_dir=str(tmp_path / "input"),
+            results_dir=str(tmp_path / "results"),
+            threads=4,
+            kneaddata_db="/db/kneaddata",
+            kraken2_db=None,
+            skip_taxonomy=True,
+        )

@@ -125,7 +125,9 @@ def run_full_pipeline(
     tax_output_dir = results_root / TAXONOMIC_PROFILING_DIR
     div_output_dir = results_root / DIVERSITY_ANALYSIS_DIR
     func_output_dir = results_root / FUNCTIONAL_ANNOTATION_DIR
-    kneaddata_output = qc_output_dir / "kneaddata"
+    # 跳过 QC 时没有 quality_control/kneaddata 产物；下游直接把
+    # --input-dir 当作已清洗数据（需符合 *_paired_1.fastq 命名）。
+    kneaddata_output = Path(input_dir) if skip_qc else qc_output_dir / "kneaddata"
 
     try:
         if skip_qc:
@@ -174,7 +176,9 @@ def run_full_pipeline(
             biom_file = tax_output_dir / "feature-table.biom"
             if not biom_file.exists():
                 raise MissingInputError(
-                    f"未找到多样性分析所需的 BIOM 文件: {biom_file}"
+                    f"未找到多样性分析所需的 BIOM 文件: {biom_file}。"
+                    "使用 --skip-taxonomy 时必须预先提供该文件；"
+                    "全新运行请同时跳过依赖它的 --skip-diversity。"
                 )
             _run_stage(
                 "多样性分析",

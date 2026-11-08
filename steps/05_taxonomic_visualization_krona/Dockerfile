@@ -23,7 +23,6 @@ USER root
 RUN apt-get clean && \
     apt-get update && \
     apt-get install -y apt-utils curl && \
-    conda config --set ssl_verify no && \
     conda install -c bioconda krona=2.8.1 && \
     ktUpdateTaxonomy.sh && \
     apt-get clean && \

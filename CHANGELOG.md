@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- 修正 README 的 `full-run` / `dry-run` 示例：标注数据库路径占位符，并为 `dry-run` 补齐必需的 `--kneaddata-db` / `--kraken2-db` 参数
+- 修复 Kraken2 汇总把未分类 reads 扣两次：report 的 R 行本身就是已分类 reads，
+  `total = classified + unclassified`，不再从 root 中再减一次；分类率恢复正常
+- Krona 图表改用 Kraken2 逐条输出 `.kraken`（`-q 2 -t 3`），此前误把 report
+  第 3 列的 reads 计数当作 taxid；缺少 `.kraken` 时回退到 report 的 `-t 5 -m 2`
+- `micos doctor` 未显式传数据库参数时读取配置文件中的路径
+- `scripts/run_module.sh` 在配置文件缺失时不再因 `set -e` 提前退出，改由模块给出
+  可操作的数据库参数提示；新增回归测试
+- Krona Docker 镜像不再关闭 conda 的 TLS 校验，依赖安装恢复证书验证
+- 修复 `run_manifest.json` 的 `git_commit` 取自调用者当前目录仓库：`_git_commit()` 现在固定 `cwd` 为包根（`Path(__file__).parents[1]`）；wheel 安装没有 `.git` 时仍返回 `None`，不会误记用户项目版本
+- 明确 `--skip-qc` / `--skip-taxonomy` 的语义：`--skip-qc` 时物种分类与功能注释直接读取 `--input-dir`（视为已清洗数据，需 `*_paired_1.fastq` 命名）；`--skip-taxonomy` 且未跳过多样性时，CLI 提前校验 `results/taxonomic_profiling/feature-table.biom`，缺失返回用法错误（退出码 2），`full_run` 的 `MissingInputError` 文本补充前置条件。CLI 帮助与 `docs/zh/reference/cli.md` 同步
+- 新增 3 条回归测试：git cwd、skip-qc 下游输入、skip-taxonomy 缺 BIOM 的 CLI/编排错误
+- 修复物种分类混入历史报告：`kraken-biom`/Krona 仅使用本次运行实际生成的 `.report`，不再通配输出目录中的旧文件，避免复用 results 目录时样本数虚增
+- 修复 HUMAnN 失败时 `temp_humann_input/` 临时合并 FASTQ 残留：样本处理循环改为 `try/finally` 清理（`ignore_errors=True`，不掩盖原始错误）
+- 新增 2 条回归测试：历史 `.report` 不参与聚合、HUMAnN 失败后临时目录被清理
+- Kraken2 样本并行：样本数大于 1 时用线程池并行执行，并行度与单样本
+  `--threads` 共享总线程预算（`workers = min(样本数, threads)`，
+  `per_sample_threads = threads // workers`），不再让 N 个进程各开 `threads`
+  线程造成 CPU 超订；`kraken-biom` 输入仍按样本发现顺序排列
+
 ## [1.2.0] - 2026-11-06
 
 - 新增 `results/run_manifest.json`：记录 MICOS/Python/平台/git commit、外部工具版本、数据库路径、输入文件、参数和阶段状态/耗时

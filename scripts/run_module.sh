@@ -37,15 +37,32 @@ run_micos() {
 
 load_defaults() {
     local config_arg="$1"
-    IFS=$'\t' read -r DEFAULT_INPUT_DIR DEFAULT_RESULTS_DIR DEFAULT_THREADS DEFAULT_KNEADDATA_DB DEFAULT_KRAKEN2_DB < <(
-        PYTHONPATH="$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$config_arg" <<'PY'
+    DEFAULT_INPUT_DIR=""
+    DEFAULT_RESULTS_DIR=""
+    DEFAULT_THREADS=""
+    DEFAULT_KNEADDATA_DB=""
+    DEFAULT_KRAKEN2_DB=""
+
+    # 配置缺失时不要因为 set -e 在读取默认值阶段静默退出；
+    # 交给各模块的 require_value 给出可操作的提示。
+    if [[ ! -f "$config_arg" ]]; then
+        return 0
+    fi
+
+    local defaults
+    if ! defaults=$(PYTHONPATH="$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 - "$config_arg" <<'PY'
 from micos.utils import get_full_run_defaults
 import sys
 config_path = sys.argv[1] if len(sys.argv) > 1 else None
 defaults = get_full_run_defaults(config_path)
 print(defaults.get('input_dir', ''), defaults.get('results_dir', ''), defaults.get('threads', ''), defaults.get('kneaddata_db', ''), defaults.get('kraken2_db', ''), sep='\t')
 PY
-    )
+    ); then
+        echo "警告: 无法读取配置 $config_arg，使用空默认值。" >&2
+        return 0
+    fi
+
+    IFS=$'\t' read -r DEFAULT_INPUT_DIR DEFAULT_RESULTS_DIR DEFAULT_THREADS DEFAULT_KNEADDATA_DB DEFAULT_KRAKEN2_DB <<< "$defaults"
 }
 
 require_value() {

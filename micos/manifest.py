@@ -69,10 +69,16 @@ def collect_tool_versions() -> dict[str, dict[str, str | bool | None]]:
 
 
 def _git_commit() -> str | None:
-    """读取当前仓库 commit；不在 git 仓库中时返回 None。"""
+    """读取 MICOS 包所在仓库的 commit；不在 git 仓库中时返回 None。
+
+    必须显式指定 cwd：继承调用者目录会把用户分析项目的 commit 误记成
+    MICOS 代码版本。安装为 wheel 时包根通常没有 .git，返回 None 是正确结果。
+    """
+    repo_root = Path(__file__).resolve().parents[1]
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
+            cwd=repo_root,
             capture_output=True,
             text=True,
             timeout=5,

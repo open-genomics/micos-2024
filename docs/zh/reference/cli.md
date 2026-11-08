@@ -53,6 +53,14 @@ micos full-run \
 
 跳过参数：`--skip-qc`、`--skip-taxonomy`、`--skip-functional`、`--skip-diversity`
 
+跳过语义：
+
+- `--skip-qc`：不运行 FastQC/KneadData，物种分类与功能注释直接读取 `--input-dir`；
+  输入文件需已按 `*_paired_1.fastq` / `*_paired_2.fastq` 命名（视作清洗后数据）。
+- `--skip-taxonomy`：不运行 Kraken2。若多样性分析未跳过，必须预先在
+  `results/taxonomic_profiling/feature-table.biom` 提供 BIOM；全新运行请同时
+  加 `--skip-diversity`，否则 CLI 返回用法错误。
+
 可选参数：`--metadata` 指定样本元数据 TSV（`sample-id` 或 `#SampleID` 列与 FASTQ 文件名 join，
 模板见 `config/samples.tsv.template`）。
 

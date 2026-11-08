@@ -49,3 +49,26 @@ def test_run_manifest_writes_environment_and_inputs(tmp_path):
     }
     assert data["stages"][0]["name"] == "质量控制"
     assert data["environment"]["micos_version"]
+
+
+def test_git_commit_uses_package_repo_not_caller_cwd(monkeypatch, tmp_path):
+    """git_commit 必须固定在包根执行，不能继承用户当前目录的仓库."""
+    from pathlib import Path
+    import subprocess
+
+    from micos import manifest
+
+    captured = {}
+
+    def fake_run(cmd, **kwargs):
+        captured["cmd"] = cmd
+        captured["cwd"] = kwargs.get("cwd")
+        return subprocess.CompletedProcess(cmd, 0, stdout="abc123\n", stderr="")
+
+    monkeypatch.setattr(manifest.subprocess, "run", fake_run)
+    monkeypatch.chdir(tmp_path)  # 模拟在任意目录运行
+
+    assert manifest._git_commit() == "abc123"
+    assert (
+        Path(captured["cwd"]).resolve() == Path(manifest.__file__).resolve().parents[1]
+    )

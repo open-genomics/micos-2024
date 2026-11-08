@@ -25,7 +25,7 @@ from micos.config import (
 from micos.diversity_analysis import run_diversity_analysis
 from micos.doctor import run_doctor
 from micos.errors import MicosError
-from micos.full_run import run_full_pipeline
+from micos.full_run import TAXONOMIC_PROFILING_DIR, run_full_pipeline
 from micos.functional_annotation import run_functional_annotation
 from micos.quality_control import run_qc
 from micos.summarize_results import run_summarize
@@ -141,6 +141,14 @@ def main(
                 "input_dir": resolved["input_dir"].value,
                 "results_dir": resolved["results_dir"].value,
                 "threads": resolved["threads"].value,
+                "kneaddata_db": resolved["kneaddata_db"].value,
+                "kraken2_db": resolved["kraken2_db"].value,
+            },
+        )
+        # doctor 未显式传数据库参数时，同样使用配置文件中的路径。
+        ctx.default_map.setdefault(
+            "doctor",
+            {
                 "kneaddata_db": resolved["kneaddata_db"].value,
                 "kraken2_db": resolved["kraken2_db"].value,
             },
@@ -277,8 +285,16 @@ def doctor(
     type=click.Path(exists=True, dir_okay=False),
     help="样本元数据 TSV 文件路径 (sample-id 列与 FASTQ 文件名 join).",
 )
-@click.option("--skip-qc", is_flag=True, help="跳过质量控制步骤.")
-@click.option("--skip-taxonomy", is_flag=True, help="跳过物种分类步骤.")
+@click.option(
+    "--skip-qc",
+    is_flag=True,
+    help="跳过质量控制步骤；物种分类/功能注释直接读取 --input-dir（视为已清洗数据）.",
+)
+@click.option(
+    "--skip-taxonomy",
+    is_flag=True,
+    help="跳过物种分类步骤；若多样性分析未跳过，需预先提供 feature-table.biom.",
+)
 @click.option("--skip-functional", is_flag=True, help="跳过功能注释步骤.")
 @click.option("--skip-diversity", is_flag=True, help="跳过多样性分析步骤.")
 @click.pass_context
@@ -347,6 +363,14 @@ def full_run(
             click.echo(f"  - {stage}: {'执行' if enabled else '跳过'}")
         click.echo("不执行任何实际操作。")
         return
+
+    if skip_taxonomy and not skip_diversity:
+        biom_file = Path(results_dir) / TAXONOMIC_PROFILING_DIR / "feature-table.biom"
+        if not biom_file.exists():
+            raise click.UsageError(
+                "--skip-taxonomy 与未跳过的多样性分析同时使用时，"
+                f"需预先提供 BIOM 文件: {biom_file}（全新运行请加 --skip-diversity）。"
+            )
 
     _invoke(
         "完整分析流程",

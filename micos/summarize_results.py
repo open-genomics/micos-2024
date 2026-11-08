@@ -123,23 +123,24 @@ def _parse_kraken_report(path: Path) -> tuple[int, int, dict[str, int]]:
             continue
         try:
             clade_reads = int(fields[1])
-            taxon_reads = int(fields[2])
         except ValueError:
             continue
         rank = fields[3].strip()
         name = fields[5].strip()
 
         if rank == "R":
-            total_reads += clade_reads
+            # Kraken2 report 的 root 行只统计已分类 reads；未分类单独出现在 U 行。
+            classified_reads += clade_reads
         elif rank == "U":
             unclassified_reads += clade_reads
         elif rank == "S":
-            classified_reads += taxon_reads
             species[name] = species.get(name, 0) + clade_reads
 
-    if total_reads:
-        classified_reads = max(total_reads - unclassified_reads, 0)
+    if not classified_reads:
+        # 部分裁剪过的 report 没有 R 行，用物种 clade 之和回退。
+        classified_reads = sum(species.values())
 
+    total_reads = classified_reads + unclassified_reads
     return total_reads, classified_reads, species
 
 

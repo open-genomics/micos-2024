@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from micos.errors import NoSamplesError, StageOutputError
@@ -57,35 +58,50 @@ def run_taxonomic_profiling(
         )
 
     # 2. 运行 Kraken2
-    logger.info("--> 正在运行 Kraken2...")
+    paired_samples = [sample for sample in samples if sample.is_paired]
     for sample in samples:
         if not sample.is_paired:
             logger.warning(f"样本 {sample.name} 不是双端测序，跳过 Kraken2。")
-            continue
 
+    # 每个 Kraken2 进程都会按 --threads 开线程；并行样本数与单样本线程数共享
+    # 同一份线程预算，避免 N 个进程各开 threads 线程造成 CPU 超订。
+    workers = max(1, min(len(paired_samples), threads))
+    per_sample_threads = max(1, threads // workers)
+    logger.info(
+        f"--> 正在运行 Kraken2（{len(paired_samples)} 个样本，"
+        f"并行 {workers}，每样本 {per_sample_threads} 线程）..."
+    )
+
+    def run_kraken2(sample: Sample) -> Path:
         logger.info(f"处理样本: {sample.name}")
         kraken2_output = output_path / f"{sample.name}.kraken"
         kraken2_report = output_path / f"{sample.name}.report"
+        run_command_live(
+            [
+                "kraken2",
+                "--db",
+                str(kraken2_db),
+                "--paired",
+                str(sample.r1_path),
+                str(sample.r2_path),
+                "--output",
+                str(kraken2_output),
+                "--report",
+                str(kraken2_report),
+                "--confidence",
+                str(confidence),
+                "--threads",
+                str(per_sample_threads),
+            ]
+        )
+        return kraken2_report
 
-        kraken2_cmd = [
-            "kraken2",
-            "--db",
-            str(kraken2_db),
-            "--paired",
-            str(sample.r1_path),
-            str(sample.r2_path),
-            "--output",
-            str(kraken2_output),
-            "--report",
-            str(kraken2_report),
-            "--confidence",
-            str(confidence),
-            "--threads",
-            str(threads),
-        ]
-        run_command_live(kraken2_cmd)
+    report_files: list[Path] = []
+    if paired_samples:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            # map 保持输入顺序，后续 kraken-biom/Krona 的输入与样本发现顺序一致。
+            report_files = list(executor.map(run_kraken2, paired_samples))
 
-    report_files = sorted(output_path.glob("*.report"))
     if not report_files:
         raise StageOutputError(
             f"Kraken2 执行完成，但 {output_path} 中没有生成任何 .report 文件。"
@@ -105,14 +121,20 @@ def run_taxonomic_profiling(
     logger.info("--> 正在生成 Krona 图表...")
     for report_file in report_files:
         krona_output = output_path / f"{report_file.stem}.krona.html"
+        # Kraken2 逐条输出（.kraken）第 2 列是 read ID、第 3 列是 taxid；
+        # report 第 3 列却是 reads 计数，不能直接套用 -q 2 -t 3。
+        kraken_file = report_file.with_suffix(".kraken")
+        if kraken_file.exists():
+            krona_input = ["-q", "2", "-t", "3", str(kraken_file)]
+        else:
+            logger.warning(
+                f"未找到 {kraken_file}，改用 report 的 taxid/magnitude 列生成 Krona 图表。"
+            )
+            krona_input = ["-t", "5", "-m", "2", str(report_file)]
         run_command_live(
             [
                 "ktImportTaxonomy",
-                "-q",
-                "2",
-                "-t",
-                "3",
-                str(report_file),
+                *krona_input,
                 "-o",
                 str(krona_output),
             ]

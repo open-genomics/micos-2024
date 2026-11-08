@@ -346,6 +346,7 @@ def test_full_run_maps_no_samples_to_stable_exit_code(tmp_path, monkeypatch):
     assert result.exit_code == 6, result.output
     assert "没有样本" in result.output
 
+
 def test_version_command_reports_release_version():
     """--version 应报告发布版本，而不是 git dev 版本。"""
     runner = CliRunner()
@@ -353,3 +354,69 @@ def test_version_command_reports_release_version():
 
     assert result.exit_code == 0
     assert "1.2.0" in result.output
+
+
+def test_full_run_skip_taxonomy_without_biom_is_usage_error(tmp_path):
+    """--skip-taxonomy 且未跳过多样性时，CLI 应提前给出用法错误而不是下游失败."""
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    db = tmp_path / "db"
+    db.mkdir()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "full-run",
+            "--input-dir",
+            str(input_dir),
+            "--results-dir",
+            str(tmp_path / "results"),
+            "--kneaddata-db",
+            str(db),
+            "--skip-taxonomy",
+        ],
+    )
+
+    assert result.exit_code == 2, result.output
+    assert "feature-table.biom" in result.output
+    assert "--skip-diversity" in result.output
+
+
+def test_doctor_uses_config_database_paths(tmp_path, monkeypatch):
+    """doctor 未显式传参时应读取配置文件中的数据库路径。"""
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "analysis.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "paths": {
+                    "input_dir": str(tmp_path / "input"),
+                    "output_dir": str(tmp_path / "results"),
+                    "databases": {
+                        "kneaddata": str(tmp_path / "db" / "kneaddata"),
+                        "kraken2": str(tmp_path / "db" / "kraken2"),
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    captured = {}
+
+    def fake_run_doctor(kneaddata_db, kraken2_db, json_output):
+        captured.update(
+            kneaddata_db=kneaddata_db, kraken2_db=kraken2_db, json_output=json_output
+        )
+        return 0
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("micos.cli.run_doctor", fake_run_doctor)
+
+    result = CliRunner().invoke(main, ["doctor", "--json"])
+
+    assert result.exit_code == 0, result.output
+    assert captured["kneaddata_db"] == str(tmp_path / "db" / "kneaddata")
+    assert captured["kraken2_db"] == str(tmp_path / "db" / "kraken2")
+    assert captured["json_output"] is True

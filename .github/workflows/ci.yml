@@ -12,6 +12,8 @@ jobs:
   lint:
     name: Code Quality Check
     runs-on: ubuntu-latest
+    # 注: 本 job 仅运行 black/isort/flake8/mypy。bandit、shellcheck、pydocstyle、
+    #     markdownlint 等门禁由 .pre-commit-config.yaml 定义，当前仅在本地执行。
     steps:
     - uses: actions/checkout@v7
 

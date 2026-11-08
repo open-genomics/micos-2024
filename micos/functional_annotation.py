@@ -61,51 +61,53 @@ def run_functional_annotation(
         )
 
     # 2. 为每个样本准备 HUMAnN 输入并运行
-    for sample in samples:
-        logger.info(f"处理样本: {sample.name}")
+    try:
+        for sample in samples:
+            logger.info(f"处理样本: {sample.name}")
 
-        # 查找 unmatched 文件（如果存在）
-        unmatched1_file = sample.r1_path.parent / f"{sample.name}_unmatched_1.fastq"
-        unmatched2_file = sample.r1_path.parent / f"{sample.name}_unmatched_2.fastq"
+            # 查找 unmatched 文件（如果存在）
+            unmatched1_file = sample.r1_path.parent / f"{sample.name}_unmatched_1.fastq"
+            unmatched2_file = sample.r1_path.parent / f"{sample.name}_unmatched_2.fastq"
 
-        concatenated_file = temp_input_path / f"{sample.name}_concatenated.fastq.gz"
-        logger.info(f"合并样本 {sample.name} 的 reads 到 {concatenated_file}")
+            concatenated_file = temp_input_path / f"{sample.name}_concatenated.fastq.gz"
+            logger.info(f"合并样本 {sample.name} 的 reads 到 {concatenated_file}")
 
-        # 合并所有 reads
-        files_to_concat: list[Path] = [sample.r1_path]
-        if sample.is_paired and sample.r2_path is not None:
-            files_to_concat.append(sample.r2_path)
-        if unmatched1_file.exists():
-            files_to_concat.append(unmatched1_file)
-        if unmatched2_file.exists():
-            files_to_concat.append(unmatched2_file)
+            # 合并所有 reads
+            files_to_concat: list[Path] = [sample.r1_path]
+            if sample.is_paired and sample.r2_path is not None:
+                files_to_concat.append(sample.r2_path)
+            if unmatched1_file.exists():
+                files_to_concat.append(unmatched1_file)
+            if unmatched2_file.exists():
+                files_to_concat.append(unmatched2_file)
 
-        with gzip.open(concatenated_file, "wb") as f_out:
-            for f_in_path in files_to_concat:
-                opener = gzip.open if f_in_path.suffix == ".gz" else open
-                with opener(f_in_path, "rb") as f_in:
-                    shutil.copyfileobj(f_in, f_out)
+            with gzip.open(concatenated_file, "wb") as f_out:
+                for f_in_path in files_to_concat:
+                    opener = gzip.open if f_in_path.suffix == ".gz" else open
+                    with opener(f_in_path, "rb") as f_in:
+                        shutil.copyfileobj(f_in, f_out)
 
-        # 运行 HUMAnN
-        logger.info(f"--> 正在为样本 {sample.name} 运行 HUMAnN...")
-        humann_cmd = [
-            "humann",
-            "--input",
-            str(concatenated_file),
-            "--output",
-            str(output_path),
-            "--threads",
-            str(threads),
-            "--output-basename",
-            sample.name,
-        ]
-        try:
-            run_command_live(humann_cmd)
-        except (subprocess.CalledProcessError, FileNotFoundError) as e:
-            logger.error(f"HUMAnN 运行失败: {e}")
-            logger.error("请确保 humann 已安装并位于系统的 PATH 中。")
-            raise
+            # 运行 HUMAnN
+            logger.info(f"--> 正在为样本 {sample.name} 运行 HUMAnN...")
+            humann_cmd = [
+                "humann",
+                "--input",
+                str(concatenated_file),
+                "--output",
+                str(output_path),
+                "--threads",
+                str(threads),
+                "--output-basename",
+                sample.name,
+            ]
+            try:
+                run_command_live(humann_cmd)
+            except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                logger.error(f"HUMAnN 运行失败: {e}")
+                logger.error("请确保 humann 已安装并位于系统的 PATH 中。")
+                raise
+    finally:
+        # 失败时也清理合并 FASTQ，避免残留数 GB 的临时数据
+        shutil.rmtree(temp_input_path, ignore_errors=True)
 
-    # 清理临时文件
-    shutil.rmtree(temp_input_path)
     logger.info("功能注释分析完成。")

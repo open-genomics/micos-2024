@@ -36,6 +36,19 @@ def test_run_module_rejects_unsupported_module():
     assert '当前未纳入稳定 Shell 包装层' in result.stderr
 
 
+def test_run_module_missing_config_reports_module_requirement(tmp_path):
+    """配置文件缺失时不应在读取默认值阶段静默退出，而应给出模块参数提示."""
+    missing = tmp_path / 'missing.yaml'
+    result = subprocess.run(
+        ['bash', str(RUN_MODULE), 'quality_control', '--config', str(missing)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert '质量控制模块需要 KneadData 数据库路径' in result.stderr
+
+
 def test_run_full_analysis_rejects_legacy_skip_and_resume():
     """完整流程包装层不再维护 skip/resume 逻辑."""
     result = subprocess.run(

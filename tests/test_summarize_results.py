@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """测试结果汇总模块。"""
 
-from micos.summarize_results import generate_summary_report
+from micos.summarize_results import generate_summary_report, parse_kraken_reports
 
 
 def test_generate_summary_report_supports_named_layout(tmp_path):
@@ -63,7 +63,7 @@ def test_generate_summary_report_includes_metrics(tmp_path):
     (results_dir / "taxonomic_profiling").mkdir(parents=True)
     (results_dir / "diversity_analysis" / "alpha_diversity").mkdir(parents=True)
     (results_dir / "taxonomic_profiling" / "sample1.report").write_text(
-        "100.00\t1000\t1000\tR\t1\troot\n"
+        " 80.00\t800\t800\tR\t1\troot\n"
         " 60.00\t600\t600\tS\t562\tEscherichia coli\n"
         " 20.00\t200\t200\tS\t1280\tStaphylococcus aureus\n"
         " 20.00\t200\t0\tU\t0\tunclassified\n",
@@ -91,3 +91,21 @@ def test_generate_summary_report_includes_metrics(tmp_path):
     assert "3.2100" in html_text
     assert "test-run" in html_text
     assert "质量控制" in html_text
+
+
+def test_parse_kraken_reports_does_not_double_subtract_unclassified(tmp_path):
+    """Kraken2 report 的 R 行已是分类 reads，未分类只在 U 行扣一次。"""
+    results_dir = tmp_path / "results"
+    (results_dir / "taxonomic_profiling").mkdir(parents=True)
+    (results_dir / "taxonomic_profiling" / "sample1.report").write_text(
+        " 60.00\t600\t600\tR\t1\troot\n"
+        " 40.00\t400\t400\tS\t562\tEscherichia coli\n"
+        " 20.00\t200\t0\tU\t0\tunclassified\n",
+        encoding="utf-8",
+    )
+
+    summary = parse_kraken_reports(results_dir)
+
+    assert summary is not None
+    assert summary.total_reads == 800
+    assert summary.classified_reads == 600
