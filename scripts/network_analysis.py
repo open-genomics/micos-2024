@@ -34,7 +34,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 try:
     import matplotlib.pyplot as plt
     import networkx as nx
-    from scipy.stats import pearsonr, spearmanr
+    from scipy.stats import spearmanr, t
 except ImportError as e:
     print(f"警告: 缺少必要的依赖包: {e}")
 
@@ -164,19 +164,11 @@ class NetworkAnalyzer:
         """计算Spearman相关性"""
         logger.info("计算Spearman相关性...")
 
-        n_features = df.shape[0]
-        corr_matrix = np.zeros((n_features, n_features))
-        p_values = np.zeros((n_features, n_features))
-
-        for i in range(n_features):
-            for j in range(i, n_features):
-                if i == j:
-                    corr_matrix[i, j] = 1.0
-                    p_values[i, j] = 0.0
-                else:
-                    corr, pval = spearmanr(df.iloc[i], df.iloc[j])
-                    corr_matrix[i, j] = corr_matrix[j, i] = corr
-                    p_values[i, j] = p_values[j, i] = pval
+        # 一次性传入整个矩阵：scipy 只对每个变量排秩一次，再成对计算，
+        # 避免旧实现每对都重复 rank 两行。
+        corr_matrix, p_values = spearmanr(df.to_numpy(dtype=float).T)
+        corr_matrix = np.asarray(corr_matrix, dtype=float)
+        p_values = np.asarray(p_values, dtype=float)
 
         corr_df = pd.DataFrame(corr_matrix, index=df.index, columns=df.index)
         pval_df = pd.DataFrame(p_values, index=df.index, columns=df.index)
@@ -189,19 +181,23 @@ class NetworkAnalyzer:
         """计算Pearson相关性"""
         logger.info("计算Pearson相关性...")
 
-        n_features = df.shape[0]
-        corr_matrix = np.zeros((n_features, n_features))
-        p_values = np.zeros((n_features, n_features))
-
-        for i in range(n_features):
-            for j in range(i, n_features):
-                if i == j:
-                    corr_matrix[i, j] = 1.0
-                    p_values[i, j] = 0.0
-                else:
-                    corr, pval = pearsonr(df.iloc[i], df.iloc[j])
-                    corr_matrix[i, j] = corr_matrix[j, i] = corr
-                    p_values[i, j] = p_values[j, i] = pval
+        data = df.to_numpy(dtype=float)
+        # np.corrcoef 一次算完整个相关矩阵；p 值仍按与 scipy.pearsonr
+        # 相同的 t 近似公式向量化计算（df = 样本数 - 2）。
+        corr_matrix = np.corrcoef(data)
+        n_samples = data.shape[1]
+        if n_samples > 2:
+            with np.errstate(divide="ignore", invalid="ignore"):
+                t_stat = corr_matrix * np.sqrt(
+                    (n_samples - 2) / np.clip(1.0 - corr_matrix**2, 1e-300, None)
+                )
+            p_values = 2.0 * t.sf(np.abs(t_stat), n_samples - 2)
+            p_values = np.nan_to_num(p_values, nan=1.0)
+        else:
+            p_values = np.ones_like(corr_matrix)
+        corr_matrix = np.nan_to_num(corr_matrix, nan=0.0)
+        np.fill_diagonal(corr_matrix, 1.0)
+        np.fill_diagonal(p_values, 0.0)
 
         corr_df = pd.DataFrame(corr_matrix, index=df.index, columns=df.index)
         pval_df = pd.DataFrame(p_values, index=df.index, columns=df.index)

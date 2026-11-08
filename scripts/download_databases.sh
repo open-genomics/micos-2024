@@ -34,6 +34,7 @@ download_kraken2() {
     local db_type=$1
     local db_name=$2
     local db_url=$3
+    local expected_sha=${4:-}
 
     log_info "下载 Kraken2 $db_name 数据库..."
     local target_dir="$DB_ROOT/kraken2/$db_type"
@@ -53,6 +54,23 @@ download_kraken2() {
     cd "$target_dir"
 
     wget -q --show-progress "$db_url" -O "${db_type}.tar.gz"
+
+    # 校验下载完整性：优先使用调用方提供的 SHA256；未提供时明确警告，
+    # 避免把"解压了但内容不可信"当成成功。
+    if [ -n "$expected_sha" ]; then
+        local actual_sha
+        actual_sha=$(sha256sum "${db_type}.tar.gz" | awk '{print $1}')
+        if [ "$actual_sha" != "$expected_sha" ]; then
+            log_error "SHA256 校验失败: 期望 $expected_sha，实际 $actual_sha"
+            rm -f "${db_type}.tar.gz"
+            return 1
+        fi
+        log_info "SHA256 校验通过"
+    else
+        log_warn "未提供 ${db_name} 的 SHA256，跳过完整性校验；"
+        log_warn "可通过 MICOS_KRAKEN2_${db_type^^}_SHA256 环境变量指定。"
+    fi
+
     tar -xzf "${db_type}.tar.gz"
     rm "${db_type}.tar.gz"
 
@@ -110,6 +128,8 @@ show_help() {
     echo "环境变量:"
     echo "  MICOS_DB_ROOT        数据库根目录 (默认: ~/micos_databases)"
     echo "  THREADS              并行线程数 (默认: 8)"
+    echo "  MICOS_KRAKEN2_MINIKRAKEN_SHA256 / _STANDARD_SHA256 / _PLUSPF_SHA256"
+    echo "                       对应数据库 tar.gz 的 SHA256；提供后下载即校验"
     echo ""
     echo "示例:"
     echo "  $0 kraken2-minikraken"
@@ -130,15 +150,18 @@ main() {
             ;;
         kraken2-minikraken)
             download_kraken2 "minikraken" "MiniKraken2" \
-                "https://genome-idx.s3.amazonaws.com/kraken/minikraken2_v2_8GB.tar.gz"
+                "https://genome-idx.s3.amazonaws.com/kraken/minikraken2_v2_8GB.tar.gz" \
+                "${MICOS_KRAKEN2_MINIKRAKEN_SHA256:-}"
             ;;
         kraken2-standard)
             download_kraken2 "standard" "Standard" \
-                "https://genome-idx.s3.amazonaws.com/kraken/kraken2_standard_20230605.tar.gz"
+                "https://genome-idx.s3.amazonaws.com/kraken/kraken2_standard_20230605.tar.gz" \
+                "${MICOS_KRAKEN2_STANDARD_SHA256:-}"
             ;;
         kraken2-pluspf)
             download_kraken2 "pluspf" "PlusPF" \
-                "https://genome-idx.s3.amazonaws.com/kraken/Kraken2%20PlusPF%20%2820231230%29.tar.gz"
+                "https://genome-idx.s3.amazonaws.com/kraken/Kraken2%20PlusPF%20%2820231230%29.tar.gz" \
+                "${MICOS_KRAKEN2_PLUSPF_SHA256:-}"
             ;;
         humann)
             download_humann
@@ -149,7 +172,8 @@ main() {
         all)
             log_info "下载所有数据库..."
             download_kraken2 "minikraken" "MiniKraken2" \
-                "https://genome-idx.s3.amazonaws.com/kraken/minikraken2_v2_8GB.tar.gz"
+                "https://genome-idx.s3.amazonaws.com/kraken/minikraken2_v2_8GB.tar.gz" \
+                "${MICOS_KRAKEN2_MINIKRAKEN_SHA256:-}"
             download_humann
             download_kneaddata "human_genome"
             ;;

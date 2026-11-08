@@ -23,6 +23,11 @@ All notable changes to this project will be documented in this file.
   `--threads` 共享总线程预算（`workers = min(样本数, threads)`，
   `per_sample_threads = threads // workers`），不再让 N 个进程各开 `threads`
   线程造成 CPU 超订；`kraken-biom` 输入仍按样本发现顺序排列
+- `scripts/network_analysis.py` 的相关矩阵改为一次性向量化计算：Spearman
+  用 `spearmanr(矩阵)`（每个变量只排秩一次），Pearson 用 `np.corrcoef` +
+  t 分布向量化 p 值，替换逐对调用与重复 rank 的 O(n²) 循环
+- `scripts/download_databases.sh` 支持 `MICOS_KRAKEN2_*_SHA256` 校验下载包；
+  未提供哈希时显式告警，不再静默解压未经校验的 tar.gz
 
 ## [1.2.0] - 2026-11-06
 
