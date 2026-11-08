@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- `scripts/download_databases.sh` 支持 `MICOS_DB_CHECKSUMS`：sha256sum 格式的清单，
+  按上游归档文件名（URL basename，百分号解码）或本地保存名查表；优先级为
+  `MICOS_KRAKEN2_<TYPE>_SHA256` > 清单 > 跳过（明确告警）。显式给了清单却查不到
+  条目、或清单不可读时脚本直接失败，不再静默跳过校验；文件名含空格的归档
+  （上游 PlusPF）也能匹配。脚本改为仅在直接执行时运行 `main`，便于测试；
+  新增 `tests/test_download_databases_script.py`（6 项）
 - 修正 README 的 `full-run` / `dry-run` 示例：标注数据库路径占位符，并为 `dry-run` 补齐必需的 `--kneaddata-db` / `--kraken2-db` 参数
 - 修复 Kraken2 汇总把未分类 reads 扣两次：report 的 R 行本身就是已分类 reads，
   `total = classified + unclassified`，不再从 root 中再减一次；分类率恢复正常

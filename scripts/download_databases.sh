@@ -26,15 +26,79 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 创建目录
-mkdir -p "$DB_ROOT"
+# URL 的 basename（去掉查询串，百分号编码解码成原始文件名）
+url_basename() {
+    local path=${1%%\?*}
+    path=${path##*/}
+    printf '%b' "${path//%/\\x}"
+}
+
+# 在 sha256sum 格式的清单（"<hash>  <文件名>"，二进制模式 " *文件名" 也接受）
+# 中查找某个文件名对应的 SHA256，查不到时输出空串并返回 1。
+checksum_manifest_lookup() {
+    local manifest=$1
+    local name=$2
+    [ -r "$manifest" ] || {
+        # 走 stderr：调用方用 $(...) 取返回值，stdout 会被命令替换吞掉。
+        log_error "无法读取校验清单: $manifest" >&2
+        return 2
+    }
+    # 文件名可能含空格（如上游的 "Kraken2 PlusPF (20231230).tar.gz"），
+    # 所以不能按字段取 $2：跳过 64 位 hash 与两个分隔字符后整段即为文件名。
+    awk -v n="$name" '
+        length($1) == 64 {
+            f = substr($0, 67)
+            sub(/^\*/, "", f)
+            sub(/[ \t\r]+$/, "", f)
+            if (f == n) { print $1; exit }
+        }
+    ' "$manifest"
+}
+
+# 解析某次下载期望的 SHA256：显式环境变量 > MICOS_DB_CHECKSUMS 清单 > 空（跳过校验）。
+# 显式给了清单却查不到条目时返回非零，避免"以为校验了其实没有"。
+resolve_expected_sha() {
+    local db_type=$1
+    local db_url=$2
+    local explicit=${3:-}
+
+    if [ -n "$explicit" ]; then
+        printf '%s' "$explicit"
+        return 0
+    fi
+    [ -n "${MICOS_DB_CHECKSUMS:-}" ] || return 0
+
+    local archive_name
+    archive_name=$(url_basename "$db_url")
+
+    local found
+    if ! found=$(checksum_manifest_lookup "$MICOS_DB_CHECKSUMS" "$archive_name"); then
+        return 1
+    fi
+    if [ -z "$found" ]; then
+        if ! found=$(checksum_manifest_lookup "$MICOS_DB_CHECKSUMS" "${db_type}.tar.gz"); then
+            return 1
+        fi
+    fi
+    if [ -z "$found" ]; then
+        log_error "校验清单 ${MICOS_DB_CHECKSUMS} 中没有 ${archive_name} 或 ${db_type}.tar.gz 的条目" >&2
+        return 1
+    fi
+    printf '%s' "$found"
+}
 
 # 下载 Kraken2 数据库
 download_kraken2() {
     local db_type=$1
     local db_name=$2
     local db_url=$3
-    local expected_sha=${4:-}
+    local explicit_sha=${4:-}
+    local expected_sha
+
+    if ! expected_sha=$(resolve_expected_sha "$db_type" "$db_url" "$explicit_sha"); then
+        log_error "无法为 ${db_name} 解析 SHA256，放弃下载"
+        return 1
+    fi
 
     log_info "下载 Kraken2 $db_name 数据库..."
     local target_dir="$DB_ROOT/kraken2/$db_type"
@@ -68,7 +132,7 @@ download_kraken2() {
         log_info "SHA256 校验通过"
     else
         log_warn "未提供 ${db_name} 的 SHA256，跳过完整性校验；"
-        log_warn "可通过 MICOS_KRAKEN2_${db_type^^}_SHA256 环境变量指定。"
+        log_warn "可通过 MICOS_KRAKEN2_${db_type^^}_SHA256 环境变量或 MICOS_DB_CHECKSUMS 清单指定。"
     fi
 
     tar -xzf "${db_type}.tar.gz"
@@ -130,6 +194,8 @@ show_help() {
     echo "  THREADS              并行线程数 (默认: 8)"
     echo "  MICOS_KRAKEN2_MINIKRAKEN_SHA256 / _STANDARD_SHA256 / _PLUSPF_SHA256"
     echo "                       对应数据库 tar.gz 的 SHA256；提供后下载即校验"
+    echo "  MICOS_DB_CHECKSUMS   sha256sum 格式的清单文件，按上游归档文件名查表；"
+    echo "                       显式提供却查不到条目时报错（不做静默跳过）"
     echo ""
     echo "示例:"
     echo "  $0 kraken2-minikraken"
@@ -188,4 +254,6 @@ main() {
     log_info "请更新 config/databases.yaml 中的路径: $DB_ROOT"
 }
 
-main "$@"
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    main "$@"
+fi

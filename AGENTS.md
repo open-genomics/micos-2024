@@ -209,6 +209,25 @@ chore(deps): bump pandas to 2.0.0
 | `MICOS_DB_ROOT` | 数据库根目录 |
 | `MICOS_THREADS` | 默认线程数 |
 | `MICOS_TEMP_DIR` | 临时文件目录 |
+| `MICOS_DB_CHECKSUMS` | sha256sum 格式的清单文件，`scripts/download_databases.sh` 按上游归档文件名查表 |
+| `MICOS_KRAKEN2_<TYPE>_SHA256` | 单个 Kraken2 归档的 SHA256，优先级高于清单 |
+
+### 数据库下载校验
+
+`scripts/download_databases.sh` 在解压前校验归档的 SHA256，来源优先级：
+`MICOS_KRAKEN2_<TYPE>_SHA256` 环境变量 > `MICOS_DB_CHECKSUMS` 清单 > 跳过（明确告警）。
+
+清单就是 `sha256sum` 的输出格式，文件名可含空格（上游 PlusPF 归档名就带空格与括号）：
+
+```
+<64 位十六进制>  kraken2_standard_20230605.tar.gz
+<64 位十六进制> *Kraken2 PlusPF (20231230).tar.gz
+```
+
+文件名匹配先试 URL 的 basename（百分号编码已解码），再试本地保存名
+`<type>.tar.gz`。**显式提供了清单却查不到条目、或清单不可读时脚本直接失败**，
+不会退化成"以为校验了其实没有"。Kraken2 数据库上游不发布官方校验值，
+清单需自行在可信渠道下载后生成（`sha256sum` 或 `sha256sum -b`）。
 
 ---
 
