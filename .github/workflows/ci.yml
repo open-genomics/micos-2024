@@ -8,17 +8,21 @@ on:
   release:
     types: [ published ]
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Code Quality Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # 注: 本 job 仅运行 black/isort/flake8/mypy。bandit、shellcheck、pydocstyle、
     #     markdownlint 等门禁由 .pre-commit-config.yaml 定义，当前仅在本地执行。
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up Python
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7
       with:
         python-version: '3.10'
         cache: 'pip'
@@ -43,15 +47,16 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v7
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -66,7 +71,7 @@ jobs:
         pytest tests/ -v --cov=micos --cov-report=xml --cov-fail-under=80
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v7
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7
       with:
         files: ./coverage.xml
         flags: unittests
@@ -75,15 +80,16 @@ jobs:
   docs:
     name: Docs Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: docs
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7
         with:
           node-version: '20'
           cache: 'npm'
