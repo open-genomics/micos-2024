@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "mermaid": "^11.12.2",
-    "vitepress-plugin-llms": "^1.10.0",
+    "vitepress-plugin-llms": "^1.15.0",
     "vitepress-plugin-mermaid": "^2.0.17"
   }
 }
