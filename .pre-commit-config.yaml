@@ -28,7 +28,7 @@ repos:
 
   # Python类型检查
   # 注: 原先钉 v1.8.0 是因为 mypy 2.x 不支持 python_version=3.9。项目下限已提到
-  # 3.10，该约束不复存在，可择机升级到新版本 mypy 并同步 [tool.mypy] 配置。
+  # 3.11，该约束不复存在，可择机升级到新版本 mypy 并同步 [tool.mypy] 配置。
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
     hooks:

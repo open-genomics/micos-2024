@@ -5,8 +5,8 @@ channels:
   - defaults
 
 dependencies:
-  # Python 核心（下限 3.10：pydantic 模型在运行时求值注解，用到了 X | None 语法）
-  - python=3.10
+  # Python 核心（下限 3.11：pydantic 模型在运行时求值注解，用到了 X | None 语法）
+  - python=3.11
   - pip
   - click
   - pyyaml

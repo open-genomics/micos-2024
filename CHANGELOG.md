@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- 将 Python 下限提升到 3.11，升级 `Pillow 13.0.0`、`black 26.10.1`、`filelock 4.2.12`、`virtualenv 21.15.8`，并清理旧解释器分支的锁文件；CI 矩阵调整为 3.11/3.12，文档构建使用 Node 24
+- 文档站依赖链升级：`mermaid 11.17.2`、`katex 0.18.10`、`esbuild 0.25.12`、`vite 6.4.6`；保留 VitePress 1.6.4 以避免 alpha 大版本迁移风险
 - `scripts/download_databases.sh` 支持 `MICOS_DB_CHECKSUMS`：sha256sum 格式的清单，
   按上游归档文件名（URL basename，百分号解码）或本地保存名查表；优先级为
   `MICOS_KRAKEN2_<TYPE>_SHA256` > 清单 > 跳过（明确告警）。显式给了清单却查不到
