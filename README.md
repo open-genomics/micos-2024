@@ -7,7 +7,7 @@
 [![CI](https://github.com/open-genomics/micos-2024/actions/workflows/ci.yml/badge.svg)](https://github.com/open-genomics/micos-2024/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-online-0f766e.svg)](https://open-genomics.github.io/micos-2024/)
 [![codecov](https://codecov.io/gh/open-genomics/micos-2024/branch/master/graph/badge.svg)](https://codecov.io/gh/open-genomics/micos-2024)
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **从原始 FASTQ 到可解释的微生物组结果：质控、物种分类、多样性、功能注释和 HTML 报告，一条 CLI 串联。**
