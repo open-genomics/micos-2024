@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitepress'
-import { withMermaid } from 'vitepress-plugin-mermaid'
+import { withMermaid } from 'vitepress-mermaid-viewer'
 import llmstxt from 'vitepress-plugin-llms'
 
 const rawBase = process.env.VITEPRESS_BASE
