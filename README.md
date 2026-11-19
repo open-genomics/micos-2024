@@ -4,19 +4,19 @@
 
 <div align="center">
 
-[![CI](https://github.com/open-genomics/micos-2024/actions/workflows/ci.yml/badge.svg)](https://github.com/open-genomics/micos-2024/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-online-0f766e.svg)](https://open-genomics.github.io/micos-2024/)
-[![codecov](https://codecov.io/gh/open-genomics/micos-2024/branch/master/graph/badge.svg)](https://codecov.io/gh/open-genomics/micos-2024)
+[![CI](https://github.com/holtwood-genomics/micos-2024/actions/workflows/ci.yml/badge.svg)](https://github.com/holtwood-genomics/micos-2024/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-online-0f766e.svg)](https://holtwood-genomics.github.io/micos-2024/)
+[![codecov](https://codecov.io/gh/holtwood-genomics/micos-2024/branch/master/graph/badge.svg)](https://codecov.io/gh/holtwood-genomics/micos-2024)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **从原始 FASTQ 到可解释的微生物组结果：质控、物种分类、多样性、功能注释和 HTML 报告，一条 CLI 串联。**
 
-[快速开始](#快速开始) • [输出示例](#一条命令得到什么) • [可复现性](#可复现性) • [文档](https://open-genomics.github.io/micos-2024/) • [状态与边界](#状态与边界)
+[快速开始](#快速开始) • [输出示例](#一条命令得到什么) • [可复现性](#可复现性) • [文档](https://holtwood-genomics.github.io/micos-2024/) • [状态与边界](#状态与边界)
 
 </div>
 
-> 本项目起源于 2024“猛犸杯”国际生命科学数据创新大赛，现由 [Open Genomics](https://github.com/open-genomics) 作为长期工具维护。赛事背景见[项目起源](docs/zh/research/competition.md)。
+> 本项目起源于 2024“猛犸杯”国际生命科学数据创新大赛，现由 [Holtwood Genomics](https://github.com/holtwood-genomics) 作为长期工具维护。赛事背景见[项目起源](docs/zh/research/competition.md)。
 
 ![MICOS-2024 HTML 报告预览](docs/public/illustrations/report-preview.png)
 
@@ -41,7 +41,7 @@
 ### 方式 A：uv（推荐本地开发）
 
 ```bash
-git clone https://github.com/open-genomics/micos-2024.git
+git clone https://github.com/holtwood-genomics/micos-2024.git
 cd micos-2024
 
 uv sync --extra dev
@@ -59,7 +59,7 @@ uv run micos full-run \
 ### 方式 B：Conda（完整生信工具链）
 
 ```bash
-git clone https://github.com/open-genomics/micos-2024.git
+git clone https://github.com/holtwood-genomics/micos-2024.git
 cd micos-2024
 
 mamba env create -f environment.yml
@@ -207,7 +207,7 @@ java -jar cromwell.jar run \
 
 欢迎社区贡献！详情请参阅[贡献指南](CONTRIBUTING.md)。
 
-- **报告问题 / 功能建议**：[GitHub Issues](https://github.com/open-genomics/micos-2024/issues)
+- **报告问题 / 功能建议**：[GitHub Issues](https://github.com/holtwood-genomics/micos-2024/issues)
 - **故障排除**：[常见问题](docs/zh/troubleshooting.md)
 - **仓库讨论**：GitHub Discussions 尚未开启；请先使用 Issues。
 

@@ -4,7 +4,7 @@
 
 请通过 GitHub Security Advisories 私下报告安全问题：
 
-https://github.com/open-genomics/micos-2024/security/advisories/new
+https://github.com/holtwood-genomics/micos-2024/security/advisories/new
 
 请勿在公开 Issue 中披露凭据、数据库路径、样本元数据或可利用细节。
 

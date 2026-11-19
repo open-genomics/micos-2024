@@ -3,7 +3,7 @@
 ## Metadata
 
 - Status: `Proposed`
-- Repository: `open-genomics/micos-2024`
+- Repository: `holtwood-genomics/micos-2024`
 - Base commit: `f7f58969fe1e736e591249063650de26b95c490d`
 - Capability: `configuration`
 - Task IDs: `MICOS-CONFIG-001`

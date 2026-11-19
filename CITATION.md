@@ -8,7 +8,7 @@
 
 ```
 MICOS-2024 Team. (2024). MICOS-2024: Metagenomic Intelligence and Comprehensive Omics Suite. 
-GitHub repository. https://github.com/open-genomics/micos-2024
+GitHub repository. https://github.com/holtwood-genomics/micos-2024
 ```
 
 ### BibTeX格式
@@ -18,8 +18,8 @@ GitHub repository. https://github.com/open-genomics/micos-2024
   title = {MICOS-2024: Metagenomic Intelligence and Comprehensive Omics Suite},
   author = {{MICOS-2024 Team}},
   year = {2024},
-  url = {https://github.com/open-genomics/micos-2024},
-  note = {2024 "猛犸杯" 生物信息学竞赛参赛项目，现由 Open Genomics 维护}
+  url = {https://github.com/holtwood-genomics/micos-2024},
+  note = {2024 "猛犸杯" 生物信息学竞赛参赛项目，现由 Holtwood Genomics 维护}
 }
 ```
 
@@ -27,7 +27,7 @@ GitHub repository. https://github.com/open-genomics/micos-2024
 
 ```
 MICOS-2024 Team. MICOS-2024: A comprehensive metagenomic analysis suite for microbiome research. 
-Available at: https://github.com/open-genomics/micos-2024 (2024).
+Available at: https://github.com/holtwood-genomics/micos-2024 (2024).
 ```
 
 ## 相关工具引用
@@ -107,8 +107,8 @@ https://doi.org/10.1371/journal.pone.0061217
 
 如有引用相关问题，请通过以下方式联系：
 
-- GitHub Issues: https://github.com/open-genomics/micos-2024/issues
-- GitHub Discussions: https://github.com/open-genomics/micos-2024/discussions
+- GitHub Issues: https://github.com/holtwood-genomics/micos-2024/issues
+- GitHub Discussions: https://github.com/holtwood-genomics/micos-2024/discussions
 
 ---
 

@@ -50,7 +50,7 @@ All notable changes to this project will be documented in this file.
 - 新增 `CITATION.cff`、`SECURITY.md`；CI 增加 Python 3.12，覆盖率门槛提升到 80%
 - 版本号改为 `pyproject.toml` 静态维护（1.2.0），`micos --version` 不再显示 git dev 版本
 - 配置强制校验（`enforce-effective-configuration`）：生产配置 model 统一 `extra="forbid"`，未知字段立即失败；移除 `max_memory`/`memory_gb` 等未接入 CLI 的愿景字段（迁至 `docs/zh/roadmap.md`）；明确配置优先级（CLI > analysis.yaml > databases.yaml > 默认）并支持 resolved value 来源输出；相对路径按所在配置文件目录解析；`validate-config` 对语法/未知字段/必需 stage 依赖返回非零；`full-run --dry-run` 输出 resolved plan（含 stage、输入、输出、threads、数据库、参数来源）且不执行外部工具
-- 清理历史身份与组织引用（LessUp → holtwood / open-genomics）
+- 清理历史身份与组织引用（LessUp → holtwood / holtwood-genomics）
 - 修复文档站英文 404 自动重定向，CI 增加文档构建检查
 - 归档遗留 `workflows/wdl_scripts/`，统一以 `steps/` 为权威 WDL 源
 - 修复 WDL 语法错误（Directory/None 关键字）、统一 `${}` 为 `~{}`、固定生信工具版本

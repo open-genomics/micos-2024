@@ -34,10 +34,10 @@ MICOS-2024 起源于 **2024“猛犸杯”国际生命科学数据创新大赛�
 
 赛题要求参赛者在参赛平台上开发多组学工具，创建和共享具有**应用价值大、影响力高、易用性好**的工具或工具系列。
 
-MICOS-2024 选择宏基因组学方向，整合 Kraken2、QIIME2、KneadData、HUMAnN 等工具，以 Python CLI 作为生产编排入口。大赛结束后，项目继续由 Open Genomics 维护，重点转向可复现运行清单、模块化 CLI 和自包含 HTML 报告。
+MICOS-2024 选择宏基因组学方向，整合 Kraken2、QIIME2、KneadData、HUMAnN 等工具，以 Python CLI 作为生产编排入口。大赛结束后，项目继续由 Holtwood Genomics 维护，重点转向可复现运行清单、模块化 CLI 和自包含 HTML 报告。
 
 ## 相关链接
 
-- [返回项目 README](https://github.com/open-genomics/micos-2024)
+- [返回项目 README](https://github.com/holtwood-genomics/micos-2024)
 - [系统总览](../architecture/system-overview.md)
 - [测试策略](../architecture/testing-strategy.md)
