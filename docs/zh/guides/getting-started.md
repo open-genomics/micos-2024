@@ -15,7 +15,7 @@ title: 快速开始
 ## 安装
 
 ```bash
-git clone https://github.com/open-genomics/micos-2024.git
+git clone https://github.com/holtwood-genomics/micos-2024.git
 cd micos-2024
 pip install -e ".[dev]"
 ```

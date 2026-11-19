@@ -3,7 +3,7 @@
 ## Metadata
 
 - Status: `Archived`
-- Repository: `open-genomics/micos-2024`
+- Repository: `holtwood-genomics/micos-2024`
 - Audit base: `c2c399f89c9cadf590c3a6dd13f31d51794018a5`
 - Capability: `workflow-orchestration`
 - Task IDs: `MICOS-DOC-001`, `ORG-GOV-001`

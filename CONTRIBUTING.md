@@ -8,7 +8,7 @@
 
 如果您发现了bug或有改进建议：
 
-1. 搜索[现有Issues](https://github.com/open-genomics/micos-2024/issues)，确保问题尚未被报告
+1. 搜索[现有Issues](https://github.com/holtwood-genomics/micos-2024/issues)，确保问题尚未被报告
 2. 使用相应的Issue模板：
    - [Bug报告](.github/ISSUE_TEMPLATE/bug_report.md)
    - [功能请求](.github/ISSUE_TEMPLATE/feature_request.md)
@@ -20,7 +20,7 @@
 
 ```bash
 # 1. Fork并克隆项目
-git clone https://github.com/open-genomics/micos-2024.git
+git clone https://github.com/holtwood-genomics/micos-2024.git
 cd micos-2024
 
 # 2A. 使用 Conda/Mamba（推荐用于生物信息学依赖）

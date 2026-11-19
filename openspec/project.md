@@ -2,7 +2,7 @@
 
 ## Identity
 
-- **Canonical repository**: `open-genomics/micos-2024`
+- **Canonical repository**: `holtwood-genomics/micos-2024`
 - **Lifecycle**: competition project; experimental
 - **Language**: Python (production orchestrator), WDL (experimental references)
 

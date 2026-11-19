@@ -13,7 +13,7 @@ hero:
       link: /zh/architecture/system-overview
     - theme: alt
       text: GitHub
-      link: https://github.com/open-genomics/micos-2024
+      link: https://github.com/holtwood-genomics/micos-2024
 features:
   - title: 质量控制
     details: FastQC 评估 + KneadData 宿主去除
